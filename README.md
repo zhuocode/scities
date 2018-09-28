@@ -29,8 +29,24 @@ software to be reproduced: a recent version of R must be installed. Then
 from within R you must install some packages. Entering these commands
 into the ‘R terminal’ will install them for you:
 
-    #>   osmdata        sf   stplanr tidyverse      tmap 
-    #>      TRUE      TRUE      TRUE      TRUE      TRUE
+``` r
+pkgs = c(
+  "osmdata",   # for working with open street map data
+  "sf",        # a package for working with spatial data
+  "stplanr",   # a transport data package
+  "tidyverse", # metapackage for data science
+  "tmap"       # a mapping package
+)
+
+pkgs_installed = pkgs %in% installed.packages()
+names(pkgs_installed) = pkgs
+pkgs_installed
+#>   osmdata        sf   stplanr tidyverse      tmap 
+#>      TRUE      TRUE      TRUE      TRUE      TRUE
+if(!all(pkgs_installed)) {
+  install.packages(pkgs[!pkgs_installed])
+}
+```
 
 ``` r
 devtools::install_github("robinlovelace/ukboundaries")

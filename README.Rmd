@@ -43,7 +43,7 @@ a recent version of R must be installed.
 Then from within R you must install some packages.
 Entering these commands into the 'R terminal' will install them for you:
 
-```{r, echo=FALSE}
+```{r}
 pkgs = c(
   "osmdata",   # for working with open street map data
   "sf",        # a package for working with spatial data
