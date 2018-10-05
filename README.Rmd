@@ -86,32 +86,41 @@ In brief, real-world discrete geographic features are represented in spatial dat
 
 There are 1000s of R packages and the `sf` (Simple Features) package provides formats for spatial dat aand their analysis. The `sf` vignette provides an introduction to vector data and formal descriptions of spatial formats: https://cran.r-project.org/web/packages/sf/vignettes/sf1.html
 
-To get started with spatial data in R have a look at the practical at https://rpubs.com/lexcomber/session4. For more in-depth information, you can read sections [2.2.5](https://geocompr.robinlovelace.net/spatial-class.html#geometry) and (for 'raster' data) [2.3](https://geocompr.robinlovelace.net/spatial-class.html#raster-data) of the same resource.
-We encourage you to search-for other resources on spatial data: there's lots out there and, like everything in digital methods, is rapidly evolving!
+You will be provided with all the materials you need to do this practical work. Then later, in your own time, if you are interested in developing these skills further.....there are a number of further reources that you may find useful: 
 
-Advanced methods for manipulating rasters can be found in Bivand et al (2008) 
-see http://gis.humboldt.edu/OLM/r/Spatial%20Analysis%20With%20R.pdf
-And of course there is an excellent introductory text on spatial analysis and mapping in R: https://uk.sagepub.com/en-gb/eur/an-introduction-to-r-for-spatial-analysis-and-mapping/book258267 2nd edition coming soon!
+- To get started with spatial data in R have a look at the practical at https://rpubs.com/lexcomber/session4. 
+- For more in-depth information, you can read sections [2.2.5](https://geocompr.robinlovelace.net/spatial-class.html#geometry) and (for 'raster' data) [2.3](https://geocompr.robinlovelace.net/spatial-class.html#raster-data) of the same resource.
+- There is an excellent introductory text on spatial analysis and mapping in R: https://uk.sagepub.com/en-gb/eur/an-introduction-to-r-for-spatial-analysis-and-mapping/book258267 2nd edition coming in December 2018!
+- More advanced methods for manipulating spatial data can be found in Bivand et al (2008) 
+see http://gis.humboldt.edu/OLM/r/Spatial%20Analysis%20With%20R.pdf (this assumes you know what you want to do)
+
+We encourage you to search-for other resources on spatial data: there's lots out there and, like everything in digital methods, is rapidly evolving!
 
 **Key point**: spatial data describe the location and outline where appropriate of real-world geographic features. The *attribites* of individual features are held in some form of data table (similar to a spreadsheet).
 
 ## Data sources
-traditional (eg census) and new (eg open street map)
+[traditional (eg census) and new (eg open street map]
 
-There are many sources of spatial data and it is impossibel to list all of them. Much geographic or spatial data about cities is provided by the population census, conducted every 10 years. This summarises individual household census returns to geographic areas - you may have heard of Wards, but data can be obtained for a number of different geographies from Output Area (small, about 300 people) to countries (large) via, Lower Super Output Areas (~1500 people), Medium Super Output Areas (~7500 people), local authorities, countes and unitary authorities and regions.
+### Traditional data (population census etc)
+Traditional city/transport planning uses official datasets. There are many sources of spatial data and it is impossibel to list all of them. Much geographic or spatial data about cities is provided by the population census, conducted every 10 years. This summarises individual household census returns to geographic areas - you may have heard of Wards, but data can be obtained for a number of different geographies from Output Area (small, about 300 people) to countries (large) via, Lower Super Output Areas (~1500 people), Medium Super Output Areas (~7500 people), local authorities, countes and unitary authorities and regions.
 
 In the UK, census data for these areas can be easily obtained from 2 sources. 
 
-1) Nomisweb for census data attributes - https://www.nomisweb.co.uk
-2) UKBorders for census data area - https://borders.ukdataservice.ac.uk/bds.html
+1) Nomisweb for census data attributes (data tables) - https://www.nomisweb.co.uk
+2) UKBorders for census data zones (areas) - https://borders.ukdataservice.ac.uk/bds.html
 
-Traditional city/transport planning uses official datasets.
+After downloading the data tables need to be linked to the zones and this is done through a common key usually the census area codes, which are unique for each area.
+
+**Key point**: data for different geographic *zones* in the UK and their properties can be easiliy downloaded from open respitories and then linked together.
+
 An example of this is official zoning systems, such as the 'LSOA' zones loaded and plotted below:
 
 ```{r}
 zones_leeds = ukboundaries::lsoa2011_lds
 plot(zones_leeds)
 ```
+
+### Alternative data sources
 
 Unofficial datasets, such as those provided by the OpenStreetMap project are messier but in some cases richer.
 An exmaple is provided below, which downloads and plots parks in Leeds:
