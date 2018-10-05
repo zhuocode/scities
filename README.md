@@ -61,7 +61,9 @@ library(stplanr)
 library(tidyverse)
 ```
 
-## spatial data
+## Spatial data
+
+We will be using R / RStudio, the open source software for all analysis and data manipulations. An introdcton to geting started in R/RStdio can be found at https://rpubs.com/chrisbrunsdon/UQ_rbasics - this will explain how to get TBC - I am off for lunch! 
 
 Cities are spatial entities so you should know some GIS concepts before
 grappling with city data. The introductory comments of Chapter 2 in the
@@ -69,11 +71,20 @@ open source and open access book [Geocomputation with
 R](https://geocompr.robinlovelace.net/spatial-class.html) provide an
 overview of spatial data models.
 
-For more in-depth information, you can read sections
+In brief, real-world discrete geographic features are represented in spatial databases using vectors of points, lines and areas. For example, point to represent a shop, address or postcode location, lines for linear features such roads and areas for thngs likes parks, zones, building outlines etc. Continuous features (eg temperature surfaces) are frequently repsented by gridded or raster data.  
+
+There are 1000s of R packages and the `sf` (Simple Features) package provides formats for spatial dat aand their analysis. The `sf` vignette provides an introduction to vector data and formal descriptions of spatial formats: https://cran.r-project.org/web/packages/sf/vignettes/sf1.html
+The 
+
+For more in-depth information on raster representations, you can read sections
 [2.2.5](https://geocompr.robinlovelace.net/spatial-class.html#geometry)
 and (for ‘raster’ data)
 [2.3](https://geocompr.robinlovelace.net/spatial-class.html#raster-data)
-of the same resource. We encourage you to search-for other resources on
+of the same resource. 
+Advanced methods for manipulating rasters can be found in Bivand et al (2008) 
+see http://gis.humboldt.edu/OLM/r/Spatial%20Analysis%20With%20R.pdf
+
+We encourage you to search-for other resources on
 spatial data: there’s lots out there and, like everything in digital
 methods, is rapidly evolving\!
 
