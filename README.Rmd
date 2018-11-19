@@ -1,4 +1,6 @@
 ---
+title: "An Introduction Digital (spatial data) Methods"
+author: "Lex Comber and Robin Lovelace"
 output: github_document
 ---
 
@@ -20,6 +22,18 @@ piggyback::pb_upload("Preparatory Homework for Data session.pdf")
 piggyback::pb_upload("data_sci.zip")
 unzip("data_sci.zip", exdir = "data_sci")
 file.edit("data_sci/session_v1.Rmd")
+files_to_move = list.files("data_sci", pattern = "rda|RData|msoa|bikes|MSOA|LSOA|example|All", full.names = TRUE)
+new_locations = gsub(pattern = "data_sci/", replacement = "", files_to_move)
+
+file.rename(files_to_move, new_locations)
+file.rename("data_sci")
+
+# move images
+dir.create("figures")
+files_to_move = list.files("data_sci", pattern = "png", full.names = TRUE)
+new_locations = gsub(pattern = "data_sci/", replacement = "figures/", files_to_move)
+
+file.rename(files_to_move, new_locations)
 ```
 
 
@@ -135,17 +149,6 @@ An exmaple is provided below, which downloads and plots parks in Leeds:
 # ...
 ```
 
----
-title: "An Introduction Digital (spatial data) Methods"
-author: "Lex Comber and Robin Lovelace"
-date: "12/11/2018"
-output: html_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 # 1. Introduction
 
 ## 1.1 Getting started
@@ -243,7 +246,7 @@ There are 1000s of packages in R. These contain set of tools and can be written 
 Packages can be found at the CRAN website - [https://cran.r-project.org/web/packages/](https://cran.r-project.org/web/packages/):
 
 ```{r, echo = FALSE, out.width = "100%"}
-knitr::include_graphics("cran_packages.png")
+knitr::include_graphics("figures/cran_packages.png")
 ```
 
 Users install the package once to mount it on their computer, and then it can be called in R scripts as required. 
@@ -288,7 +291,7 @@ Once installed, the packages do not need to installed again for subsequent use. 
 
 
 ```{r, echo=F, cache = T, fig.width = 10}
-knitr::include_graphics("r_example.png")
+knitr::include_graphics("figures/r_example.png")
 ```
 
 
@@ -315,16 +318,17 @@ There are a number of ways of loading data into you R session:
 
 The base installation of R comes with core functions for reading `.txt`, `csv` and other tabular formats. To load data from local files you need to point R / RStudio to the directory that contains the local file. One way is to use the `setwd()` function as in the below
 
-```{r eval = F}
+```{r, eval=FALSE}
 ## Mac
-setwd("/Users/geoaco/Desktop/")
-## Windows
-setwd("C:\\")
+wd_old = setwd("data_sci/")
 ```
 
-```{r echo = F}
-setwd("/Users/geoaco/Desktop/my_docs_mac/leeds_work/teaching_18/data_sci/")
+```{r, eval=FALSE}
+## Windows
+setwd("C:\\users\\...\\data_sci")
 ```
+
+
 Another is to use the menu system
 
 **Session > Set Working Directory ...** which give you options to chose from.
@@ -356,12 +360,7 @@ The default for `read.csv` is that the file has a header (i.e. the first row con
 The code below loads an ESRI format spatial data shapefile using the `st_read` function in the `sf` package, which you should have installed and loaded earlier. The `st_read` function can be used to load some spatial data: 
 ```{r}
 # load Spatial data  
-setwd("/Users/geoaco/Desktop/my_docs_mac/leeds_work/teaching_18/data_sci/MSOA_BoundaryData")
-msoa <- st_read("england_msoa_ru_classn_2011.shp")  
-```
-
-```{r echo = F}
-setwd("/Users/geoaco/Desktop/my_docs_mac/leeds_work/teaching_18/data_sci/")
+msoa <- st_read("MSOA_BoundaryData/england_msoa_ru_classn_2011.dbf")  
 ```
 
 This data was obtained from the UK Census Data service. It simply contains outlines of the MSOA areas. The data attributes can be examined using the `as_tibble` function from the `tidyverse`:
@@ -402,7 +401,7 @@ df.rc <- data.frame(getValues(rc))
 ```
 
 ```{r, echo=F, cache = T, fig.width = 10}
-knitr::include_graphics("rc.png")
+knitr::include_graphics("figures/rc.png")
 ```
 
 
@@ -470,7 +469,7 @@ save(list = c("ttw", "msoa"), file = "AllData.rda")
 ```
 
 ```{r echo = F}
-setwd("/Users/geoaco/Desktop/my_docs_mac/leeds_work/teaching_18/data_sci/")
+
 save(list = c("ttw", "msoa"), file = "AllData.rda")
 ```
 Make sure you run the last line of code as you will use the results in the next section.
@@ -809,16 +808,6 @@ osmdata_xml (q, 'leeds.osm')
 names (sf::st_read ('leeds.osm', layer = 'points', quiet = TRUE))
 names (osmdata_sf (q, 'leeds.osm')$osm_points)
 ```
-
-
-
-
-
-
-
-
-
-
 
 ## bringing data together in a spatial coding environment
 
