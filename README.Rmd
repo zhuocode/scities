@@ -135,6 +135,687 @@ An exmaple is provided below, which downloads and plots parks in Leeds:
 # ...
 ```
 
+---
+title: "An Introduction Digital (spatial data) Methods"
+author: "Lex Comber and Robin Lovelace"
+date: "12/11/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1. Introduction
+
+## 1.1 Getting started
+
+This session sets up the main session in the rest of the workshop. 
+
+The aims of this session are to 
+
+1. Make sure you can access RStudio on your computer
+1. Go through any queries or questions you have from the introductory materials in *Session 0*
+1. Provide you with the basic tools to get you started with R. 
+
+If have already worked through the Owen Guide (https://cran.r-project.org/doc/contrib/Owen-TheRGuide.pdf up to page 38) in advance of this training, then this session should be a useful refresher. If this is the first time that you have used R / RStudio then naughty, naughty for not doing your homework, but you should be able to get up to speed.
+
+This session will cover a number of specific but key activities:
+
+- R packages 
+- saving workspaces and projects
+- using scripts
+- loading data
+- simple visual data exploration (basic boxplots, histograms) 
+- summary statistics
+
+## 1.2 Why use R 
+
+R was initially developed by Robert Gentleman and Ross Ihaka of the Department of Statistics at the University of Auckland. R is increasingly becoming the default software package in many areas of science. There are a number of reasons for this: 
+
+- R includes a very large number of tools, functions and packages
+    - packages are libraries of tools
+    - packages are written by scientists in different subject areas
+- R has the latest methods and tools
+- New tools are in R 10-20 years ***before*** commercial software
+    - e.g. GWR was around for 10 years before being in ArcGIS 
+- The tools in R are open (i.e. the source code is visible) 
+    - you can see exactly what is being done
+    - most commercial tools are hidden - *black boxes*
+- R is free!
+
+For these reasons R is becoming widely used in many areas of scientific activity and quantitative research. 
+
+R and RStudio can be downloaded from the CRAN website and installed your own computer: 
+- R for PCs: https://cran.r-project.org/bin/windows/base/
+- R for Macs: https://cran.r-project.org/bin/macosx/
+- RStudio: https://www.rstudio.com/products/rstudio/download/#download
+You should install R before you install RStudio. RStudio is user friendly interface to R. All of the code you write (and in this workshop) will run in both environments. Here it assumed that you are using RStudio.
+
+## 1.3 Working in R 
+
+There are 2 key points about working in R 
+
+1. When working in R, either writing your own code or copy and pasting from these materials, you *should* write the code into a script or document. Go to 
+**File > New File > R Script** to open a new R file.
+
+The reasons for this are so that you get used to using the R console and running the code will help your understanding of the code's functionality. Then in order to run the code in the R console,a quick way to enter it is to highlight the code (with the mouse or using the keyboard controls) and the press `ctrl-R` or `cmd-Enter` on a Mac. 
+
+You are not expected to type all the code in - you should be able to copy and paste from the worksheet: this is not a typing course!
+
+2. Learning is R is learning to drive. You may pass your test but ti become a good driver it is time behind the wheel that counts. The importance of *learning by doing* and getting your hands dirty cannot be overstated. Some of the code might look a bit fearsome when first viewed, especially in later session BUT the only really effective way to understand it is to give it a try. 
+
+A further minor point is that in the code comments are prefixed by $#$ and are ignored by R when entered into the console. You should remember to write your code and add annotations or comments using the `#` symbol - you will see these in the code snippets below. These will help you understand your code and what you did when come back to it later.
+
+If you have worded your way through the Owen Guide (https://cran.r-project.org/doc/contrib/Owen-TheRGuide.pdf up to page 38) then you will have come across a few things that will be re-capped here: 
+
+1. Assignment: this is the basic process of giving R objects values
+```{r}
+vals <- c(4.3,7.1,6.3,5.2,3.2,2.1)
+```
+
+2. Operations: having assigned values to object that can be manipulated
+```{r}
+vals*2
+sum(vals)
+mean(vals)
+```
+
+3. Indexing: individual elements of R objects with multiple data elements can be referred to:  
+```{r}
+vals[1]    # first element
+vals[1:3]   # a subset of elements 1 to 3
+sqrt(vals[1:3]) #square roots of the subset
+vals[c(5,3,2)]  # a subset of elements 5,3,2 - note the ordering
+```
+4. There are many different data types in R: character, logical, integer etc - too many to cover here. 
+
+5. There are many different data classes in R: Vectors, Matrices, Factors, Lists
+
+## 1.4 R packages
+
+When you install R / RStudio it comes with a large number of tools already (referred to as *base  functionality*). 
+
+However, one of the joys of R, is the community of users. Users share what they do and create in R in a number of ways. One of these is through packages. Packages are collections of related functions that have been created, tested and supported with help files. These are bundled into a package and shared with other R users via the that users can download from the CRAN repository.
+
+There are 1000s of packages in R. These contain set of tools and can be written by anyone. The number of packages is continually growing. When packages are installed these can be called as libraries. The background to R, along with documentation and information about packages as well as the contributors, can be found at the R Project website http://www.r-project.org.
+
+Packages can be found at the CRAN website - [https://cran.r-project.org/web/packages/](https://cran.r-project.org/web/packages/):
+
+```{r, echo = FALSE, out.width = "100%"}
+knitr::include_graphics("cran_packages.png")
+```
+
+Users install the package once to mount it on their computer, and then it can be called in R scripts as required. 
+
+The basic operations are 
+
+1. install the package before the first time it is used
+    - you may have to set a mirror site the fist time you install a a package
+    - **this is only done once**
+1. load the package using the `library` function to use the package tools
+    - **this is done for each R session**
+
+So a typical way to do this is to eneter something similar to the below
+
+```{r eval = F}
+install.packages("<package name>"", dep = TRUE)
+```
+
+Or you can either use the RStudio menu\
+
+**Tools > Install Packages...**  
+
+To install the `tidyverse` enter: 
+
+```{r eval = F}
+install.packages("tidyverse", dep = TRUE)
+```
+
+Note you may have to respond to the request from R / RStudio to set a mirror - a site from which to download the package - pick the nearest one!
+
+This loads a number of packages in - the tidyverse is a wrapper for many packages and functions - hence the need for `dep = TRUE` parameter in the `install.packages()` function above. The `tidyverse` - see https://www.tidyverse.org -  is a collection of R packages designed for data science. We all live in the tidyverse now....!
+
+As well as `tidyverse`,i n this workshop we will use a number of packages that you will need to install as we go through the sessions. You should install the following packages and load them in the same way:
+
+- `sf`
+- `tmap`
+- `raster`
+- `reshape2`
+- `rgeos`
+
+Once installed, the packages do not need to installed again for subsequent use. The can simply be called using the `library` function. Usually, I load the packages at the start of my R scripts.
+
+
+```{r, echo=F, cache = T, fig.width = 10}
+knitr::include_graphics("r_example.png")
+```
+
+
+```{r eval=T, echo=F, message=F, warning=F, cache = F, results='hide'}
+library(tidyverse)
+library(sf)
+library(tmap)
+library(raster)
+library(reshape2)
+library(rgeos)
+```
+
+
+## 1.5 Loading data
+
+There are a number of ways of loading data into you R session: 
+
+1. read a local file in proprietary format (eg an excel file or `.csv` file)
+1. read a local R formatted binary file (typically with an `.rda` or `.RData` extension)
+1. download and manipulate data from the internet - we are not going to do that in this workshop)
+1. read a file from somewhere in the internet (proprietary or R binary format) - we may do some of that
+
+### Loading `.csv` format data 
+
+The base installation of R comes with core functions for reading `.txt`, `csv` and other tabular formats. To load data from local files you need to point R / RStudio to the directory that contains the local file. One way is to use the `setwd()` function as in the below
+
+```{r eval = F}
+## Mac
+setwd("/Users/geoaco/Desktop/")
+## Windows
+setwd("C:\\")
+```
+
+```{r echo = F}
+setwd("/Users/geoaco/Desktop/my_docs_mac/leeds_work/teaching_18/data_sci/")
+```
+Another is to use the menu system
+
+**Session > Set Working Directory ...** which give you options to chose from.
+
+However you do it you should now set your working directory to the folder that contains the file `msoa_data_in.csv` and run the code below to load the data:
+```{r}
+# load the data
+ttw <- read.csv("msoa_data_in.csv")
+```
+
+This loads a data table of 107 rows and 109 columns. These are data for the 107 MSOAs census areas in Leeds. These are *Medium Super Output Areas* containing around ~7,500 people in each. Here the data was obtained from https://www.nomisweb.co.uk/census/2011/WU03EW and describes proportions of people travelling to work by bike ***from*** each MSOA ***to*** each MSOA. Data with from-to information are known as "origin-destination" data or "flow" data.
+
+. You can inspect the data in a few ways. 
+```{r}
+## dimensions - rows and columns
+dim(ttw)
+## column / variable names
+names(ttw)
+## look at the first 6 rows and 7 columns
+ttw[1:6,1:7]
+## use the sumamry function for the first 7 columns
+summary(ttw[,1:7])
+```
+
+The default for `read.csv` is that the file has a header (i.e. the first row contains the names of the columns) and that the separator between values in any record is a comma. However these can be changed depending on the nature of the file you are seeking to load into R. A number of different types of files can be read into R.You should examine the help files for reading data in different formats. Enter `??read` to see some of these listed. You will note that `read.table` and `write.table` require more parameters to be specified than `read.csv` and `write.csv`. 
+
+### Loading spatial data including Shapefiles and Rasters
+
+The code below loads an ESRI format spatial data shapefile using the `st_read` function in the `sf` package, which you should have installed and loaded earlier. The `st_read` function can be used to load some spatial data: 
+```{r}
+# load Spatial data  
+setwd("/Users/geoaco/Desktop/my_docs_mac/leeds_work/teaching_18/data_sci/MSOA_BoundaryData")
+msoa <- st_read("england_msoa_ru_classn_2011.shp")  
+```
+
+```{r echo = F}
+setwd("/Users/geoaco/Desktop/my_docs_mac/leeds_work/teaching_18/data_sci/")
+```
+
+This data was obtained from the UK Census Data service. It simply contains outlines of the MSOA areas. The data attributes can be examined using the `as_tibble` function from the `tidyverse`:
+```{r}
+head(as_tibble(msoa))
+```
+
+You can also examine the spatial properties of the data using the `plot` function associated with `sf` objects. This can be used to plot the outline of the data objects.
+```{r}
+# outline
+plot(st_geometry(msoa))
+```
+
+You can also load some raster data: The code below gives an example but I am not sure whether to keep this in! 
+
+```{r eval = F}
+setwd( "/Users/geoaco/Desktop/my_docs_mac/leeds_work/research/COSIT/paperanal/new_anal_v3/")
+new.proj <- CRS("+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.999601272 +x_0=400000 +y_0=-100000
++ +ellps=airy +towgs84=375,-111,431,0,0,0,0 +units=m +no_defs")
+y  <- as(readGDAL("2011_all/2011_b1.rst"), "RasterLayer"); proj4string(y)  <- new.proj
+x1 <- as(readGDAL("2011_all/2011_b2.rst"), "RasterLayer"); proj4string(x1) <- new.proj
+x2 <- as(readGDAL("2011_all/2011_b3.rst"), "RasterLayer"); proj4string(x2) <- new.proj
+x3 <- as(readGDAL("2011_all/2011_b4.rst"), "RasterLayer"); proj4string(x3) <- new.proj
+r <- stack(y,x1,x2,x3)
+ex <- extent(604000, 619000, 290000, 305000)
+rc <- crop(r, ex) 
+names(rc) <- c("y", "x1", "x2","x3")
+save(rc, file = "rc.RData")
+```
+
+```{r echo = T, eval = F}
+load("rc.RData")
+png(filename = "rc.png", w = 8, h = 8, units = "in", res = 600)
+plotRGB(stack(rc), 3,2,1, stretch="lin")
+scalebar(5000, type = "bar", xy = c(613246.3, 290702.6), divs = 4, col = "white", below = "m")
+dev.off()
+df.rc <- data.frame(getValues(rc))
+```
+
+```{r, echo=F, cache = T, fig.width = 10}
+knitr::include_graphics("rc.png")
+```
+
+
+### Loading R binary files
+
+You can also load R binary files. These have the advantage of being very efficient at storing data and quicker to load than for example, `.csv` files. By convention they have a `.rda` or `.RData` extension: 
+
+```{r eval = F}
+load("ttw.rda")
+## use ls to see what is loaded
+ls()
+```
+You should see that a variable called `bike_travel` has been loaded. It is the same as the data read into `ttw`. You can explore the `bike_travel` R object if you want to using the functions above that were applied to `ttw`.  
+
+### Other data formats 
+
+If you continue to work with R you will want to use all kinds of different data formats - from different flavours of data table `.CSV`, `Excel`, `SPSS` to explicitly geographical data such as shapefiles and rasters. These can all be loaded directly into R using functions from different packages. There are too many to cover comprehensively. But generally if there is a data format out there, there is also a tool to get it into R!  
+
+The `foreign` package can be used to load many file types (e.g. EXCEL and SPSS) and a number of different approaches for reading data types are listed here: [https://www.r-bloggers.com/read-excel-files-from-r/](https://www.r-bloggers.com/read-excel-files-from-r/)
+
+## 1.6 Saving data
+
+### CSV Files
+
+Data can be written into a Comma Separated Variable file using the command `write.csv` and then read back into a different variable, as follows: 
+```{r eval=F}
+write.csv(ttw, file = "ttw.csv")
+```
+
+This writes a `.csv` file into the current working directory. If you open it using a text editor or a spreadsheet software, you will see  that it has the expected column plus the index for each record. This is because the default for `write.csv` includes the `row.names = TRUE` parameter. Again examine the help file for this function.
+```{r eval = F}
+write.csv(ttw, file = "test.csv", row.names = F)
+```
+
+### Spatial data including Shapefiles
+
+In a similar way the `st_write` function can used to write data out into a number of formats 
+
+```{r eval = F}
+st_write(msoa, "msoa.shp" )
+```
+
+### R Data files
+
+It is possible to save variables that are in your workspace to a designated `.rda` or `.RData` file. This can be loaded at the start of your next session. Saving your *workspace* saves everything that is present in your workspace - as listed by `ls()` - whilst the `save` command allows you to specify what variables you wish to save. 
+
+There are a number of ways to do this: 
+
+You can save the workspace using the drop down menus
+**Session > Save Workspace As...**
+
+You can save the workspace using the `save.image` function
+```{r eval = F}
+save.image(file = "myworkspace.RData")
+```
+
+You can save specified elements using the `save` function recalling that either `.rda` or `.RData` extensions can be used:
+```{r eval = F}
+# this will save everything in the workspace
+save(list = ls(), file = "MyData.rda")
+# this will save just ttw
+save(list = "ttw", file = "MyData.RData")
+# this will save ttw and msoa
+save(list = c("ttw", "msoa"), file = "AllData.rda")
+```
+
+```{r echo = F}
+setwd("/Users/geoaco/Desktop/my_docs_mac/leeds_work/teaching_18/data_sci/")
+save(list = c("ttw", "msoa"), file = "AllData.rda")
+```
+Make sure you run the last line of code as you will use the results in the next section.
+
+## 1.7 Initial Exploratory Data Analysis
+
+The aim of Exploratory Data Analysis (EDA) is to examine the data. Specifically you might might be interested in distributions, mean, median, max and min values, tables of class counts and, if undertaking some kind of statistical analysis such as regression, examining the correlations between the covariates and the target variable, determining the presence of any collinearity. The aim here is understanding - what do the data show, what  are the spatial and non-spatial properties, what variables might you include or exclude from your analysis (variable selection). 
+
+In the below these considerations are evaluated in the following sequence: 
+
+1. simple descriptive statistics
+1. Distributions and skewness (you may need to undertake transformations of certain variables) and the presence of outliers.
+1. Correlations (but these are not covered in this workshop)
+
+In the previous sections you loaded and saved a number of R objects. To make sure you have the right data you should clear your workspace and re-load the `AllData.rda` file. To clear our workspace either go to
+**Session > Clear Workspace...***
+or enter
+```{r eval = T}
+rm(list = ls())
+```
+Load the travel to work data by cycling again for the MSOAs in Leeds and check what is loaded us `ls()`:
+```{r}
+load("AllData.rda")
+ls()
+```
+
+### Simple data explorations
+You have two R objects in your workspace: `ttw` `and `msoa`. The first thing is establish what types or classes they are:
+
+```{}
+class(ttw)
+class(msoa)
+```
+
+Here we can see that both objects are of the class `data.frame`. This is a data table a but like a spreadsheet in Excel. The `msoa` object is also of class `sf` indicating its spatial nature.
+
+First, examine the `ttw` data. This records the proportions of working people (commuters) cycling to work in each MSOA area to each other MSOA area in Leeds (the data is *WU03EW - Location of usual residence and place of work by method of travel to work (MSOA level* and has been downloaded from here: https://www.nomisweb.co.uk/census/2011/WU03EW and manipulated a bit for use in this workshop). The MSOA codes in the `ttw` data contains the **origin** (rows) and **desination** (columns) MSOAs. The `dim`, `head` and `names` functions show that the data has 107 rows, 109 columns, the names are a series of census codes: 
+
+```{r}
+dim(ttw)
+names(ttw)
+ttw[1:6, 1:10]
+```
+There are 107 of these areas in Leeds. Notice how the code above just examined the first 10 columns of the `ttw` data and notice how low the data values are. This s confirmed when the `summary` function is used: 
+```{r}
+summary(ttw[, 3:10])
+# examine the Pop variable
+summary(ttw$Pop)
+```
+ 
+We can see the total proportions of the commuting population that is cycling to work living in each LSOA using the code below.
+
+```{r}
+round(apply(ttw[, 3:109], 1, sum), 2)
+```
+
+The numbers are low - typically around 0.02. We could make the numbers a bit easier to interpret by normalising these proportions so that they describe the numbers of commuters by bike per 1000 commuters
+```{r}
+ttw[, 3:109] <- ttw[,2] * ttw[, -c(1,2)]
+ttw[1:6, 1:10]
+```
+And then when we look at the numbers cycling from each LSOA origin again 
+```{r}
+round(apply(ttw[, 3:109], 1, sum), 2)
+```
+
+There are obviously some areas that which have more cycling commuters (let's call them *CCs*) than others.  
+
+****
+**NB** the line of code above although complex, can be unpicked: 
+- `apply` is a function that applies another function to a data table either over each row in the data table or each column. The direction the function is applied is indicated by the second argument in the call to the function, in this case `1` for each row (`2` would indicate each column)
+- the function is `sum` which sums all the values in each row 
+- the data table, `ttw[, 3:109]` is all rows and columns 3 to 109
+- `round` is another function that allows you to control the number of decimal places, in this case 2 (although none were shown: try running `apply(ttw[, 3:109], 1, sum` to see what happens when you don't use it)
+
+So just by change the `1` to `2` the same code can be used to see how many people travel *to* each MSOA ie each destination (The `as.vector` gets rid of the names in the result): 
+```{r}
+as.vector(round(apply(ttw[, 3:109], 2, sum), 2))
+```
+There are some MSOAs that have very high numbers of people cycling to them. Why do you think this is? 
+****
+
+## Visual data expolorations 
+The `hist` function can be used visually sumamrise distributions of values across the MSOAS. Try running the code below;
+```{r}
+hist(ttw$Pop, breaks = 10,
+  xlab = "Population", main = "Populations across MSOAs in Leeds", col = "red")
+```
+
+Alternatively`ggplot2` package that is loaded with the `tidyverse` van also be used: 
+```{r eval = T}
+ggplot(ttw, aes(x=Pop)) + 
+    geom_histogram(binwidth=180,colour="white", fill = "red") +
+    xlab("Population")+
+    labs(title="Populations across MSOAs in Leeds")
+```
+
+This is more involved than simple `hist` but the basic idea is that `ggplot` is called and then the type of plot is specified. It allows layers of plot instructions to be compiled. It can also be used to create density plots: 
+```{r eval = T}
+ggplot(ttw, aes(x=Pop)) + 
+    geom_histogram(aes(y=..density..),
+                   binwidth=180,colour="white") +
+    geom_density(alpha=.2, fill="#FF6666") +
+    theme(axis.title.y=element_blank())+
+    xlab("Population")+
+    labs(title="Populations across MSOAs in Leeds")
+```
+
+The `boxplot()` function also provides a useful way of summarising data:
+```{r eval = T}
+boxplot(ttw$Pop, main = "The distribution MSOA populations in Leeds")
+```
+
+And there is `ggplot` version as well but this is not so good for single values and better when comparing distributions of some value across categorical variables (as is done later in this section)
+```{r eval = T}
+ggplot(ttw, aes(x=1, y = Pop)) + 
+    geom_boxplot() 
+```
+
+We can also examine the `msoa` object in the same way. The `as_tibble` function converts the `data.frame` of `msoa` to a `tibble format. We do not have time to cover this here but these are another data table similar to `data.frame` but a bit smarter 
+```{r eval = T}
+summary(as_tibble(msoa))
+```
+
+This shows that we have some categorical variables (actual a Rural and Urban classification) and some codes relating to MSOA labeling.
+
+As this is spatial data some of these attributes can be mapped: 
+Or the attributes held by each object in the spatial dataset (in this case 107 MSOA census areas in Leeds:
+```{r}
+# plot by attrubute
+plot(msoa["ruc11cd"])
+```
+
+The `tmap` package allows more sophisticated maps (as `ggplot2` does for other graphics): 
+```{r}
+tm_shape(msoa) +
+  tm_polygons("ruc11cd")
+```
+
+However, `tmap` also allows interactive graphics for example with an OpenStreetMap backdrop, Notice the use of transparency parameter specified through `aslpha` and a particular OSM backdrop in the code below: 
+```{r}
+# set the mode to view for OSM
+tmap_mode('view')
+# call the basic map but with 
+tm_shape(msoa) +
+  tm_polygons("ruc11cd", alph = 0.4) +
+  tm_view(basemaps = "OpenStreetMap")
+# reset the plot mode
+tmap_mode('plot')
+```
+You should be able to zoom in and explore *where* these different classes of urban and ruralness are. 
+
+
+## 1.8 Combining / Joining data
+
+You may have noticed that `ttw` and `msoa` have an attribute in common:
+```{r}
+head(ttw$From_LSOA)
+head(msoa$code)
+```
+These can be used to link or join the data together. 
+```{r}
+temp <- full_join(msoa, ttw, by = c("code" = "From_MSOA"))
+class(temp)
+names(temp)
+head(as_tibble(temp[, 1:6]))
+```
+Notice how the attributes from `ttw` have been joined to those of `msoa` in `temp` which is also a `sf` object. It can be mapped as before, again with a transparency term:
+```{r}
+tmap_mode('view')
+tm_shape(temp) +
+  tm_polygons("Pop", alph = 0.4) +
+  tm_view(basemaps = "OpenStreetMap")
+# reset the plot mode
+tmap_mode('plot')
+```
+And a boxplot of the population distributions for different types of MSOA can be shown together:  
+```{r}
+# Boxplot
+ggplot(temp, aes(ruc11, Pop)) +
+  geom_boxplot()+
+  xlab("Rural / Urban Class")+
+  ylab("Population")+
+  labs(title="Population distributions across different Rural / Urban MSOAs in Leeds")
+```
+
+## Summary
+
+This session has provided some rubrics for working in R (scripts, etc) showed how to get data in and out of R and developed some simple visualisations of data.
+
+In later sessions we will expand n this but using the `ggplot2` package. This comes with the `tidyverse` and although it involves a bit of a learning curve it produces excellent visualisations and is extremely controllable. However there is at first but there is plenty of help and advice on the internet and in core text books. For example the following sites may be useful:
+
+You should be set up for the rest of the workshop and
+
+- have R and RStudio installed
+- be able to create and save scripts for your code
+- annotate the code with comments using the `#` symbol
+- set and change your working directory (either through the menu or use `setwd()`)
+- be able to load csv spatial and R data files from local folders 
+
+If **any** of the above are not true then please talk to Lex or Robin now!!!
+
+Next we will develop some analysis of flows.
+
+### Getting UK census data 
+- census data https://www.nomisweb.co.uk Data downloads > Query data
+- census areas https://census.ukdataservice.ac.uk specifically https://borders.ukdataservice.ac.uk/bds.html and https://borders.ukdataservice.ac.uk/easy_download.html
+
+
+## Resources
+- ggplot guide: http://www.sthda.com/english/wiki/be-awesome-in-ggplot2-a-practical-guide-to-be-highly-effective-r-software-and-data-visualization 
+- ggplot cheat sheet: https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf
+
+# 2. Flows
+
+## 2.1 Origins and Destinations
+
+In the second part of the practical we will look at commuting flows between MSOAs by bike and identify opportunities for extending the cycle network in Leeds 
+
+Recall that the `temp` variable combines the spatial data and the cycling data. The rows are are each origin and the LSOA coded columns are the destinations with other variables:
+
+```{r}
+as_tibble(temp)
+```
+It is interesting to examine the Origin and Destinations locations from which and to which cyclists are commuting. To this, we can create 2 variables based on the sum of all cyclists leaving from all origin locations and the sum of all cyclists arriving at ALL destination locations. 
+
+This could be a bit convoluted using the temp object as would need to create a copy of temp without geometry and check that the order of the columns (destinations) matches the order of the rows (origins) in `ttw` and `temp`, etc etc. Probably the easiest way is to create the variables in `ttw` and then redo the join above to recreate `temp`. However we still need to check that order of the Origins (rows) matches that of the Destinations (columns) in `ttw`. The code below aligns these using the `match` function.
+
+```{r}
+index <- match(names(ttw)[3:109], ttw$From_MSOA)
+# examine index
+index
+# then use it to reorder the rows 
+# ie the second element in the match call
+ttw <- ttw[index,]
+```
+
+Then, now we are confident that the row and column ordering are the same for the MSOAs, we can calculate the origin and destination totals
+
+```{r}
+ttw$OriginSum <- round(rowSums(ttw[3:109]),0)
+ttw$DestSum <- round(colSums(ttw[3:109]),0)
+```
+
+If you examine these then it is evident that the origin values are more evenly distributed than the destination values:
+```{r}
+ttw$OriginSum
+ttw$DestSum
+```
+
+Now `temp` can be recreated and this time will include these new attributes:
+```{r}
+temp <- full_join(msoa, ttw, by = c("code" = "From_MSOA"))
+```  
+
+and the origins and destination values of people commuting by bike can be mapped.
+
+```{r}
+tm_shape(temp) +
+  tm_polygons(c("OriginSum", "DestSum")) +
+  tm_layout(legend.position = c("left","bottom"))
+```  
+
+Here we can see that there are very distinct and perhaps expected patterns with flows into the centre of Leeds from the surrounding areas.
+
+## 2.2 Mapping Flows
+
+In terms of mapping these flows, this can be done using the code below, adapted from http://spatial.ly/2015/03/mapping-flows/. The code *melts* the `ttw` data to 3 columns, links that to MSOA polygon geometric centroids (these are points that represent the centre of  each MSOA area) and then merges these together 
+
+```{r}
+# melt the data
+input <- melt(ttw[,-c(2, 110, 111)], id.vars = "From_MSOA")
+names(input)<- c("origin", "destination","total")
+# create centroids with a Code reference
+centroids <- data.frame(st_coordinates(st_centroid(msoa)), Code = msoa$code)
+# merge to get the xy coordinates joined to the origins
+or.xy<- merge(input, centroids, by.x="origin", by.y="Code")
+names(or.xy)<- c("origin", "destination", "trips", "oX", "oY")
+# merge to get the xy coordinates joined to the destinations
+dest.xy<-  merge(or.xy, centroids, by.x="destination", by.y="Code")
+names(dest.xy)<- c("origin", "destination", "trips", "oX", "oY", "dX", "dY")
+```
+
+This having been done the flows greater than 3, can be plotted using `ggplot`. First some parameters need to be set:
+```{r}
+xquiet<- scale_x_continuous("", breaks=NULL)
+yquiet<-scale_y_continuous("", breaks=NULL)
+quiet<-list(xquiet, yquiet)
+```
+
+Then apply `ggplot` with `geom_segment`:
+```{r}
+# plot line segments with ggplot 
+ggplot(dest.xy[which(dest.xy$trips>3),])+
+  # "alpha=" is line transparency below 
+  geom_segment(aes(x=oX, y=oY,xend=dX, yend=dY, alpha=trips), size = 1, col="white")+
+  # then set the line transparency - essential to make the plot readable
+  scale_alpha_continuous(range = c(0.03, 0.3))+
+  # set background, and remove axes and fix aspect ratio
+  theme(panel.background = element_rect(fill='black',colour='black'))+
+  quiet+
+  coord_equal()
+```
+
+Some context can be applied by modifying the plot commands above:
+```{r cache1, cache = T, message=F, warning=F, cache = F, results='hide'}
+# prepare an outline of the study area 
+pols <- SpatialPolygonsDataFrame(gUnaryUnion(as(msoa, "Spatial")), data = data.frame(1))
+pols@data$id = rownames(pols@data)
+pols.points = fortify(pols, region="id")
+pols.df = left_join(pols.points, pols@data, by="id")
+# then apply a modified version of the above plotting 
+ggplot()+
+# "alpha=" is line transparency below 
+geom_polygon(data = pols.df, aes(x=long, y=lat), colour="grey", fill="tomato") +
+geom_segment(data = dest.xy[which(dest.xy$trips>10),], 
+  aes(x=oX, y=oY,xend=dX, yend=dY, alpha=trips), size = 1, col="black")+
+# then set the line transparency - essential to make the plot readable
+  scale_alpha_continuous(range = c(0.03, 0.3))+ coord_equal()
+```
+
+## 2.3 Cycle Routes between flow areas
+
+I have had a play but perhaps this is something you could do? I would like to 
+- download cycle routes 
+- compare these with flows
+- identify origin - destination pairs that could benefit from improved cycle routes
+
+I have has a play below but I am not quite there yet! 
+from https://cran.r-project.org/web/packages/osmdata/vignettes/osm-sf-translation.html
+```{r eval = F}
+library(osmdata)
+q <- opq (bbox = 'Leeds, UK')
+q <- add_osm_feature (q, key = 'name') # any named objects
+osmdata_xml (q, 'leeds.osm')
+names (sf::st_read ('leeds.osm', layer = 'points', quiet = TRUE))
+names (osmdata_sf (q, 'leeds.osm')$osm_points)
+```
+
+
+
+
+
+
+
 
 
 
