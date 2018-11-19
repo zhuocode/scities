@@ -14,6 +14,12 @@ knitr::opts_chunk$set(
 ```{r, eval=FALSE, echo=FALSE}
 # this file was created with the following command:
 usethis::use_readme_rmd()
+# to release stuff do: 
+piggyback::pb_new_release(tag = "0.1")
+piggyback::pb_upload("Preparatory Homework for Data session.pdf")
+piggyback::pb_upload("data_sci.zip")
+unzip("data_sci.zip", exdir = "data_sci")
+file.edit("data_sci/session_v1.Rmd")
 ```
 
 
@@ -74,7 +80,6 @@ library(tidyverse)
 ```
 
 
-
 ## Spatial data
 
 We will be using R / RStudio, the open source software for all analysis and data manipulations. An introdcton to geting started in R/RStdio can be found at https://rpubs.com/chrisbrunsdon/UQ_rbasics - this will explain how to install R / RStudio and critically specific packages with specific functionality (eg for reading spatial data, making maps etc).
@@ -132,6 +137,8 @@ An exmaple is provided below, which downloads and plots parks in Leeds:
 
 
 
+
+
 ## bringing data together in a spatial coding environment
 
 Then in the practical, by way of example of the issues raised int he lecture, we will develop something that looks at where new cycle routes could be developed in Leeds
@@ -142,3 +149,4 @@ Then in the practical, by way of example of the issues raised int he lecture, we
 ## then identify areas that would benefit from additional cycling routes
 
 ## we may even suggest potential routes! 
+
