@@ -1396,7 +1396,7 @@ plot(input_sf100_buffer["total"])
 
 ![](README_files/figure-gfm/unnamed-chunk-63-1.png)<!-- -->
 
-## 6.3 Cycle Routes between flow areas
+## 6.3 Routing to represent cycling behaviour
 
 There are 2 main types of route assignment you can do in R: on-line
 routing and off-line routing. Both are covered in the
@@ -1444,6 +1444,213 @@ plot(routes_df)
 
 ![](README_files/figure-gfm/unnamed-chunk-66-2.png)<!-- -->
 
+``` r
+osm_sf <- opq("Leeds, UK") %>%
+            add_osm_feature(key = "cycleway") %>%
+            osmdata_sf()
+saveRDS(osm_sf, "osm_sf.Rds")
+```
+
+For speed of processing this has be pre-saved and can be loaded as
+follows:
+
+``` r
+osm_sf = readRDS("osm_sf.Rds")
+```
+
+We can inspect the object that we have extracted
+
+``` r
+class(osm_sf$osm_lines)
+names(osm_sf$osm_lines)
+osm_sf$osm_lines
+```
+
+And then plot the spatial object
+
+``` r
+plot(st_geometry(osm_sf$osm_lines))
+```
+
+![](README_files/figure-gfm/unnamed-chunk-70-1.png)<!-- -->
+
+It would be nice to see this in the context of the MSOAs but the
+`hampi_sf$osm_lines` data will need to be converted to the same spatial
+reference as the MSOAs: from WGS84 (latitude and longitude) in decimal
+degrees to Ordnance Survey’s British National Grid in metres:
+
+``` r
+osm_sf$osm_lines <- st_transform(osm_sf$osm_lines, crs = 27700)
+tm_shape(osm_sf$osm_lines)+
+  tm_lines(lwd = 2, col = "red")+
+  tm_shape(msoa)+
+  tm_borders(, alpha = 0.5, col = "lightgrey")
+```
+
+![](README_files/figure-gfm/unnamed-chunk-71-1.png)<!-- -->
+
+This shows the current cycle routes and can be considered against the
+original and destinations mapped before:
+
+``` r
+tm_shape(temp) +
+  tm_polygons(c("OriginSum", "DestSum")) +
+  tm_layout(legend.position = c("left","bottom"))
+```
+
+There are many ways we could / should determine new cycle routes but
+perhaps the easiest is to examine the distribution of distances that
+people cycle, to identify the typical distances that people are prepared
+to cycle in this region. We can use the distribution of distances people
+cycle to do this. First we can write a little function and to calculate
+the distance between the coordinates in the `dest.xy` data created
+above:
+
+``` r
+head(dest.xy)
+#>      origin destination    trips       oX       oY       dX       dY
+#> 1 E02002330   E02002330 1.000001 439488.1 448310.2 439488.1 448310.2
+#> 2 E02002330   E02002388 0.000000 425762.5 434785.6 439488.1 448310.2
+#> 3 E02002330   E02002402 0.000000 437159.4 433039.6 439488.1 448310.2
+#> 4 E02002330   E02002382 0.000000 432223.0 435128.6 439488.1 448310.2
+#> 5 E02002330   E02002362 0.000000 425567.2 437266.4 439488.1 448310.2
+#> 6 E02002330   E02002420 0.000000 429434.6 430131.7 439488.1 448310.2
+# function to calulate distace in km between MSOAs
+calc.dist <- function(x){
+  return( sqrt( (x[3]-x[1])^2 + (x[4]-x[3])^2 ) /1000)
+}
+# create a new variable in dest.xy
+dest.xy$dist <- apply(dest.xy[,4:7], 1,calc.dist )
+```
+
+Then we can use this to generate a distribution of distances cycled to
+work
+
+``` r
+trip.counts <- round(dest.xy$trips, 0)
+dist.vec <- vector()
+for( i in 1: length(trip.counts)) {
+  dist.i <- rep(dest.xy$dist[i], trip.counts[i])
+  dist.vec <- append(dist.vec, dist.i)
+}
+```
+
+The results can be checked
+
+``` r
+length(dist.vec)
+#> [1] 5389
+sum(ttw$OriginSum)
+#> [1] 5389
+```
+
+And then we can have a look at the distribution of cycling trip
+distances and specifally the typical distance people cycle use the
+inter-quartile range (IQR):
+
+``` r
+summary(dist.vec)
+#>     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+#>  0.07873  3.77425  5.53612  6.63882  8.12938 34.73399
+ggplot(data.frame(x = dist.vec), aes(x = x)) + 
+    geom_histogram(binwidth=1,colour="white") +
+    geom_vline(aes(xintercept = summary(dist.vec)[2]), lwd = 2, col = "#FB6A4ACC") +
+    geom_vline(aes(xintercept = summary(dist.vec)[5]), lwd = 2, col = "#FB6A4ACC") +
+    xlab("Distance (km)")+
+    labs(title="Distribution of commuting cycle distances in Leeds, with IQRs")
+```
+
+![](README_files/figure-gfm/unnamed-chunk-76-1.png)<!-- -->
+
+So most people travel between 3.8 and8.1 km during their cycling commute
+and we know that the majority of the commuting is to the centre of the
+city. This suggests a region around the centre MSOAs that could be
+mapped and investigated for potential routes. To confirm we can map the
+MOSAs with more than 150 cycle commutes. We will need to work with
+projected data (in metres) to make the distance measures easier.
+
+First we need to make an index to align and reorder `ttw` to make sure
+the data rows are aligned.
+
+``` r
+index <- match(msoa$code, ttw$From_MSOA)
+index 
+#>   [1]   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17
+#>  [18]  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34
+#>  [35]  35  36  37  38  39  40  41  42  43  44  45  46  47  48  49  68  69
+#>  [52]  70  85  86  87  88  89  90  91  92  93  94  95  96  97  98  99 100
+#>  [69] 101 102 103  50  51  52  53  54  55  56  57  58  59  60  61  62  63
+#>  [86]  64  65  66  76  77  78  79  80  81  82  83  84  67  71  72  73  74
+#> [103]  75 104 105 106 107
+ttw <- ttw[index, ]
+```
+
+Then we can map the MSOAs that are the largest destinations to confirm
+they are contiguous and then combine these and create buffers reflecting
+these distances. Here we have to work in projected
+
+``` r
+# map 
+tm_shape(msoa)+
+  tm_borders("lightgrey")+
+  tm_shape(msoa[ttw$DestSum > 150,])+
+  tm_polygons()
+```
+
+![](README_files/figure-gfm/unnamed-chunk-78-1.png)<!-- -->
+
+``` r
+# combine
+city <- st_union(msoa[ttw$DestSum > 150,])
+city_buf_inner <-st_buffer(city, 3800) 
+city_buf_outer <-st_buffer(city, 8100) 
+```
+
+Then we can examine the commuters in the MSOAs in this area, with cycle
+routes in order to suggest areas for cycle route development.
+
+``` r
+# set the plot to the outer buffer
+tm_shape(city_buf_outer)+
+  tm_borders(NULL)+
+# map the MSOA origins 
+  tm_shape(temp)+
+  tm_polygons("OriginSum")+
+# map the core MSOAs destinations
+  tm_shape(city)+
+  tm_polygons()+
+# map the buffers
+  tm_shape(city_buf_outer)+
+  tm_borders("red")+
+  tm_shape(city_buf_inner)+
+  tm_borders("red")+
+# finally map the existingclyce routes
+  tm_shape(osm_sf$osm_lines)+
+  tm_lines(lwd = 2, col = "red")
+```
+
+![](README_files/figure-gfm/unnamed-chunk-79-1.png)<!-- -->
+
+This suggests a number of possible area for expansion of the cycle route
+where there are large number of existing cycle commuters and a lack of
+cycle routes:
+
+  - to the North-North-West of the city
+  - to the North-North-East of the city
+  - to the South of the city
+
+There are a number of caveats and potential refinements that could be
+undertaken:
+
+  - MSOAs are quite spatially course and lower geographies could be more
+    informative
+  - MSOA centroids were used to evaluate distances
+  - the Census data are quite out of date and cycling has exploded in
+    recent years meaning that the patterns of cycle commuting may have
+    changed
+  - further analyses could examine how the development of cycle routes
+    could be used to expand the cycling community
+
 ## 6.4 Exercises
 
   - Identify the busiest routes in Leeds
@@ -1463,3 +1670,11 @@ There is much more to learn and the recommended step, after
 consolidating the content in this practical, is to find important
 real-world problems and tackle them. R can be one more tool, a free and
 open tool, to help take on city planning challenges and injustices.
+
+In terms of further R resources, there is lots out there,
+    including:
+
+  - <https://uk.sagepub.com/en-gb/eur/an-introduction-to-r-for-spatial-analysis-and-mapping/book241031>
+  - <https://www.springer.com/gb/book/9781461476177>
+  - <https://geocompr.robinlovelace.net/>
+  - <https://cengel.github.io/rspatial/>
