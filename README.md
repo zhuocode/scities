@@ -4,7 +4,7 @@ Lex Comber and Robin Lovelace
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Introduction
+# 1\. Introduction
 
 The goal of scities is to provide teaching materials for the Digital
 Methods workshop as part of the Sustainable Cities Masters at the
@@ -19,7 +19,7 @@ or (worse) `README.docx`? Because you can include R chunks like this:
 d = Sys.Date()
 msg = "Welcome to the digital methods workshop on "
 print(paste0(msg, d))
-#> [1] "Welcome to the digital methods workshop on 2018-11-19"
+#> [1] "Welcome to the digital methods workshop on 2018-11-23"
 ```
 
 The date automatically changes each time we build (‘compile’) the
@@ -27,162 +27,7 @@ document. Automation is an important concept in digital methods. It’s
 also practically useful. Automation saves time\!
 
 This document is also reproducible, which is vital for democratically
-accountable and transparent decision-making. But it depends on some
-software to be reproduced: a recent version of R must be installed. Then
-from within R you must install some packages. Entering these commands
-into the ‘R terminal’ will install them for you:
-
-``` r
-pkgs = c(
-  "osmdata",   # for working with open street map data
-  "sf",        # a package for working with spatial data
-  "stplanr",   # a transport data package
-  "tidyverse", # metapackage for data science
-  "tmap"       # a mapping package
-)
-
-pkgs_installed = pkgs %in% installed.packages()
-names(pkgs_installed) = pkgs
-pkgs_installed
-#>   osmdata        sf   stplanr tidyverse      tmap 
-#>      TRUE      TRUE      TRUE      TRUE      TRUE
-if(!all(pkgs_installed)) {
-  install.packages(pkgs[!pkgs_installed])
-}
-```
-
-``` r
-devtools::install_github("robinlovelace/ukboundaries")
-```
-
-You can check these have been installed properly with the following
-commands:
-
-``` r
-library(sf)
-library(stplanr)
-library(tidyverse)
-```
-
-## Spatial data
-
-We will be using R / RStudio, the open source software for all analysis
-and data manipulations. An introdcton to geting started in R/RStdio can
-be found at <https://rpubs.com/chrisbrunsdon/UQ_rbasics> - this will
-explain how to install R / RStudio and critically specific packages with
-specific functionality (eg for reading spatial data, making maps etc).
-
-Cities are spatial entities so you should know some GIS concepts before
-grappling with city data. The introductory comments of Chapter 2 in the
-open source and open access book [Geocomputation with
-R](https://geocompr.robinlovelace.net/spatial-class.html) provide an
-overview of spatial data models.
-
-In brief, real-world discrete geographic features are represented in
-spatial databases using vectors of points, lines and areas. For example,
-point to represent a shop, address or postcode location, lines for
-linear features such roads and areas for things likes parks, zones,
-building outlines etc. Continuous features (eg temperature surfaces) are
-frequently repsented by gridded or raster data. The *spatial* objects
-provide a framework for hanging information or *attributes* about these
-features. This could be the number of people living in each house, the
-area of a park, the opening times of a shop etc, and each object can
-have multiple attributes that are usually held in some form data table.
-Thus a spatial database holds information about the location and extent
-of geographic features and their properties or *attributes*.
-
-There are 1000s of R packages and the `sf` (Simple Features) package
-provides formats for spatial dat aand their analysis. The `sf` vignette
-provides an introduction to vector data and formal descriptions of
-spatial formats:
-<https://cran.r-project.org/web/packages/sf/vignettes/sf1.html>
-
-You will be provided with all the materials you need to do this
-practical work. Then later, in your own time, if you are interested in
-developing these skills further…..there are a number of further reources
-that you may find useful:
-
-  - To get started with spatial data in R have a look at the practical
-    at <https://rpubs.com/lexcomber/session4>.
-  - For more in-depth information, you can read sections
-    [2.2.5](https://geocompr.robinlovelace.net/spatial-class.html#geometry)
-    and (for ‘raster’ data)
-    [2.3](https://geocompr.robinlovelace.net/spatial-class.html#raster-data)
-    of the same resource.
-  - There is an excellent introductory text on spatial analysis and
-    mapping in R:
-    <https://uk.sagepub.com/en-gb/eur/an-introduction-to-r-for-spatial-analysis-and-mapping/book258267>
-    2nd edition coming in December 2018\!
-  - More advanced methods for manipulating spatial data can be found in
-    Bivand et al (2008) see
-    <http://gis.humboldt.edu/OLM/r/Spatial%20Analysis%20With%20R.pdf>
-    (this assumes you know what you want to do)
-
-We encourage you to search-for other resources on spatial data: there’s
-lots out there and, like everything in digital methods, is rapidly
-evolving\!
-
-**Key point**: spatial data describe the location and outline where
-appropriate of real-world geographic features. The *attribites* of
-individual features are held in some form of data table (similar to a
-spreadsheet).
-
-## Data sources
-
-\[traditional (eg census) and new (eg open street map\]
-
-### Traditional data (population census etc)
-
-Traditional city/transport planning uses official datasets. There are
-many sources of spatial data and it is impossibel to list all of them.
-Much geographic or spatial data about cities is provided by the
-population census, conducted every 10 years. This summarises individual
-household census returns to geographic areas - you may have heard of
-Wards, but data can be obtained for a number of different geographies
-from Output Area (small, about 300 people) to countries (large) via,
-Lower Super Output Areas (~1500 people), Medium Super Output Areas
-(~7500 people), local authorities, countes and unitary authorities and
-regions.
-
-In the UK, census data for these areas can be easily obtained from 2
-sources.
-
-1)  Nomisweb for census data attributes (data tables) -
-    <https://www.nomisweb.co.uk>
-2)  UKBorders for census data zones (areas) -
-    <https://borders.ukdataservice.ac.uk/bds.html>
-
-After downloading the data tables need to be linked to the zones and
-this is done through a common key usually the census area codes, which
-are unique for each area.
-
-**Key point**: data for different geographic *zones* in the UK and their
-properties can be easiliy downloaded from open respitories and then
-linked together.
-
-An example of this is official zoning systems, such as the ‘LSOA’ zones
-loaded and plotted below:
-
-``` r
-zones_leeds = ukboundaries::lsoa2011_lds
-#> Using default data cache directory ~/.ukboundaries/cache 
-#> Use cache_dir() to change it.
-plot(zones_leeds)
-```
-
-![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
-
-### Alternative data sources
-
-Unofficial datasets, such as those provided by the OpenStreetMap project
-are messier but in some cases richer. An exmaple is provided below,
-which downloads and plots parks in Leeds:
-
-``` r
-# ...
-```
-
-# 1\. Introduction
+accountable and transparent decision-making.
 
 ## 1.1 Getting started
 
@@ -232,6 +77,15 @@ science. There are a number of reasons for this:
 For these reasons R is becoming widely used in many areas of scientific
 activity and quantitative research.
 
+## 1.3 RStudio
+
+RStudio is an IDE for R. Basically this means it makes using R easier,
+with various windows and clever code-autocompletion that makes writing R
+code quicker. An introdcton to geting started in R/RStdio can be found
+at <https://rpubs.com/chrisbrunsdon/UQ_rbasics> - this will explain how
+to install R / RStudio and critically specific packages with specific
+functionality (eg for reading spatial data, making maps etc).
+
 R and RStudio can be downloaded from the CRAN website and installed your
 own computer: - R for PCs:
 <https://cran.r-project.org/bin/windows/base/> - R for Macs:
@@ -241,7 +95,7 @@ install R before you install RStudio. RStudio is user friendly interface
 to R. All of the code you write (and in this workshop) will run in both
 environments. Here it assumed that you are using RStudio.
 
-## 1.3 Working in R
+## 1.4 Working in R / RStudio
 
 There are 2 key points about working in R
 
@@ -320,7 +174,7 @@ vals[c(5,3,2)]  # a subset of elements 5,3,2 - note the ordering
 5.  There are many different data classes in R: Vectors, Matrices,
     Factors, Lists
 
-## 1.4 R packages
+## 1.5 R packages
 
 When you install R / RStudio it comes with a large number of tools
 already (referred to as *base functionality*).
@@ -385,21 +239,155 @@ data science. We all live in the tidyverse now….\!
 
 As well as `tidyverse`,i n this workshop we will use a number of
 packages that you will need to install as we go through the sessions.
-You should install the following packages and load them in the same way:
+You should install the following packages and load them in the same way,
+for example by running the following code chunk:
 
-  - `sf`
-  - `tmap`
-  - `raster`
-  - `reshape2`
-  - `rgeos`
+``` r
+pkgs = c(
+  "sf",        # a package for working with spatial data
+  "tmap",      # a mapping package
+  "osmdata",   # for working with open street map data
+  "stplanr",   # a transport data package
+  "tidyverse", # metapackage for data science
+  "reshape2",  # for reformating/'shaping' data
+  "rgeos"      # an R interface to geos, similar to sf
+)
+```
+
+``` r
+install.packages(pkgs)
+```
+
+    #>        sf      tmap   osmdata   stplanr tidyverse  reshape2     rgeos 
+    #>      TRUE      TRUE      TRUE      TRUE      TRUE      TRUE      TRUE
 
 Once installed, the packages do not need to installed again for
 subsequent use. The can simply be called using the `library` function.
-Usually, I load the packages at the start of my R scripts.
+Load packages at the start of your R session or scripts as follows:
 
 ![](figures/r_example.png)<!-- -->
 
-## 1.5 Loading data
+You can also install packages from GitHub to get the most up-to-date
+versions or packages not on CRAN (be warned: GitHub packages may not be
+high quality and can be a pain to install/use\!). The following command,
+for example, installs a package that gives you quick access to some
+administrative zone datasets in the UK:
+
+``` r
+devtools::install_github("robinlovelace/ukboundaries")
+```
+
+## 1.6 Spatial data
+
+Cities are spatial entities so you should know some GIS concepts before
+grappling with city data. The introductory comments of Chapter 2 in the
+open source and open access book [Geocomputation with
+R](https://geocompr.robinlovelace.net/spatial-class.html) provide an
+overview of spatial data models.
+
+In brief, real-world discrete geographic features are represented in
+spatial databases using vectors of points, lines and areas. For example,
+point to represent a shop, address or postcode location, lines for
+linear features such roads and areas for things likes parks, zones,
+building outlines etc. Continuous features (eg temperature surfaces) are
+frequently repsented by gridded or raster data. The *spatial* objects
+provide a framework for hanging information or *attributes* about these
+features. This could be the number of people living in each house, the
+area of a park, the opening times of a shop etc, and each object can
+have multiple attributes that are usually held in some form data table.
+Thus a spatial database holds information about the location and extent
+of geographic features and their properties or *attributes*.
+
+There are 1000s of R packages and the `sf` (Simple Features) package
+provides formats for spatial dat aand their analysis. The `sf` vignette
+provides an introduction to vector data and formal descriptions of
+spatial formats:
+<https://cran.r-project.org/web/packages/sf/vignettes/sf1.html>
+
+# 2\. Data sources and data import
+
+You will be provided with all the materials you need to do this
+practical work. Then later, in your own time, if you are interested in
+developing these skills further…..there are a number of further reources
+that you may find useful:
+
+  - To get started with spatial data in R have a look at the practical
+    at <https://rpubs.com/lexcomber/session4>.
+  - For more in-depth information, you can read sections
+    [2.2.5](https://geocompr.robinlovelace.net/spatial-class.html#geometry)
+    and (for ‘raster’ data)
+    [2.3](https://geocompr.robinlovelace.net/spatial-class.html#raster-data)
+    of the same resource.
+  - There is an excellent introductory text on spatial analysis and
+    mapping in R:
+    <https://uk.sagepub.com/en-gb/eur/an-introduction-to-r-for-spatial-analysis-and-mapping/book258267>
+    2nd edition coming in December 2018\!
+  - More advanced methods for manipulating spatial data can be found in
+    Bivand et al (2008) see
+    <http://gis.humboldt.edu/OLM/r/Spatial%20Analysis%20With%20R.pdf>
+    (this assumes you know what you want to do)
+
+We encourage you to search-for other resources on spatial data: there’s
+lots out there and, like everything in digital methods, is rapidly
+evolving\!
+
+**Key point**: spatial data describe the location and outline where
+appropriate of real-world geographic features. The *attribites* of
+individual features are held in some form of data table (similar to a
+spreadsheet).
+
+## 2.1 Traditional data (population census etc)
+
+Traditional city/transport planning uses official datasets. There are
+many sources of spatial data and it is impossibel to list all of them.
+Much geographic or spatial data about cities is provided by the
+population census, conducted every 10 years. This summarises individual
+household census returns to geographic areas - you may have heard of
+Wards, but data can be obtained for a number of different geographies
+from Output Area (small, about 300 people) to countries (large) via,
+Lower Super Output Areas (~1500 people), Medium Super Output Areas
+(~7500 people), local authorities, countes and unitary authorities and
+regions.
+
+In the UK, census data for these areas can be easily obtained from 2
+sources.
+
+1)  Nomisweb for census data attributes (data tables) -
+    <https://www.nomisweb.co.uk>
+2)  UKBorders for census data zones (areas) -
+    <https://borders.ukdataservice.ac.uk/bds.html>
+
+After downloading the data tables need to be linked to the zones and
+this is done through a common key usually the census area codes, which
+are unique for each area.
+
+**Key point**: data for different geographic *zones* in the UK and their
+properties can be easiliy downloaded from open respitories and then
+linked together.
+
+An example of this is official zoning systems, such as the ‘LSOA’ zones
+loaded and plotted below:
+
+``` r
+zones_leeds = ukboundaries::lsoa2011_lds
+#> Using default data cache directory ~/.ukboundaries/cache 
+#> Use cache_dir() to change it.
+plot(zones_leeds)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+
+## 2.2 Alternative data sources
+
+Unofficial datasets, such as those provided by the OpenStreetMap project
+are messier but in some cases richer. An exmaple is provided below,
+which downloads and plots parks in Leeds:
+
+``` r
+# ...
+```
+
+## 2.3 Loading data
 
 There are a number of ways of loading data into you R session:
 
@@ -412,7 +400,7 @@ There are a number of ways of loading data into you R session:
 4.  read a file from somewhere in the internet (proprietary or R binary
     format) - we may do some of that
 
-### Loading `.csv` format data
+## 2.4 Loading `.csv` format data
 
 The base installation of R comes with core functions for reading `.txt`,
 `csv` and other tabular formats. To load data from local files you need
@@ -526,7 +514,7 @@ files for reading data in different formats. Enter `??read` to see some
 of these listed. You will note that `read.table` and `write.table`
 require more parameters to be specified than `read.csv` and `write.csv`.
 
-### Loading spatial data including Shapefiles and Rasters
+## 2.5 Loading spatial data including Shapefiles and Rasters
 
 The code below loads an ESRI format spatial data shapefile using the
 `st_read` function in the `sf` package, which you should have installed
@@ -536,7 +524,7 @@ spatial data:
 ``` r
 # load Spatial data  
 msoa <- st_read("MSOA_BoundaryData/england_msoa_ru_classn_2011.dbf")  
-#> Reading layer `england_msoa_ru_classn_2011' from data source `/home/robin/ITSLeeds/scities/MSOA_BoundaryData/england_msoa_ru_classn_2011.dbf' using driver `ESRI Shapefile'
+#> Reading layer `england_msoa_ru_classn_2011' from data source `/mnt/27bfad9a-3474-4e61-9a43-0156ebc67d67/home/robin/ITSLeeds/scities/MSOA_BoundaryData/england_msoa_ru_classn_2011.dbf' using driver `ESRI Shapefile'
 #> Simple feature collection with 107 features and 5 fields
 #> geometry type:  POLYGON
 #> dimension:      XY
@@ -571,7 +559,7 @@ outline of the data objects.
 plot(st_geometry(msoa))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
 
 You can also load some raster data: The code below gives an example but
 I am not sure whether to keep this
@@ -603,7 +591,7 @@ df.rc <- data.frame(getValues(rc))
 
 ![](figures/rc.png)<!-- -->
 
-### Loading R binary files
+## 2.6 Loading R binary files
 
 You can also load R binary files. These have the advantage of being very
 efficient at storing data and quicker to load than for example, `.csv`
@@ -620,7 +608,7 @@ is the same as the data read into `ttw`. You can explore the
 `bike_travel` R object if you want to using the functions above that
 were applied to `ttw`.
 
-### Other data formats
+## 2.7 Other data formats
 
 If you continue to work with R you will want to use all kinds of
 different data formats - from different flavours of data table `.CSV`,
@@ -634,9 +622,9 @@ The `foreign` package can be used to load many file types (e.g. EXCEL
 and SPSS) and a number of different approaches for reading data types
 are listed here: <https://www.r-bloggers.com/read-excel-files-from-r/>
 
-## 1.6 Saving data
+# 3\. Data export
 
-### CSV Files
+## 3.1 CSV Files
 
 Data can be written into a Comma Separated Variable file using the
 command `write.csv` and then read back into a different variable, as
@@ -656,7 +644,7 @@ parameter. Again examine the help file for this function.
 write.csv(ttw, file = "test.csv", row.names = F)
 ```
 
-### Spatial data including Shapefiles
+## 3.2 Spatial data including Shapefiles
 
 In a similar way the `st_write` function can used to write data out into
 a number of formats
@@ -665,7 +653,7 @@ a number of formats
 st_write(msoa, "msoa.shp" )
 ```
 
-### R Data files
+## 3.3 R Data files
 
 It is possible to save variables that are in your workspace to a
 designated `.rda` or `.RData` file. This can be loaded at the start of
@@ -699,7 +687,7 @@ save(list = c("ttw", "msoa"), file = "AllData.rda")
 Make sure you run the last line of code as you will use the results in
 the next section.
 
-## 1.7 Initial Exploratory Data Analysis
+# 4\. Initial Exploratory Data Analysis
 
 The aim of Exploratory Data Analysis (EDA) is to examine the data.
 Specifically you might might be interested in distributions, mean,
@@ -737,7 +725,7 @@ ls()
 #> [1] "msoa" "ttw"
 ```
 
-### Simple data explorations
+## 4.1 Simple data explorations
 
 You have two R objects in your workspace: `ttw` `and`msoa\`. The first
 thing is establish what types or classes they are:
@@ -921,7 +909,7 @@ as.vector(round(apply(ttw[, 3:109], 2, sum), 2))
 There are some MSOAs that have very high numbers of people cycling to
 them. Why do you think this is? \*\*\*\*
 
-## Visual data expolorations
+## 4.2 Visual data expolorations
 
 The `hist` function can be used visually sumamrise distributions of
 values across the MSOAS. Try running the code below;
@@ -931,7 +919,7 @@ hist(ttw$Pop, breaks = 10,
   xlab = "Population", main = "Populations across MSOAs in Leeds", col = "red")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
 
 Alternatively`ggplot2` package that is loaded with the `tidyverse` van
 also be used:
@@ -943,7 +931,7 @@ ggplot(ttw, aes(x=Pop)) +
     labs(title="Populations across MSOAs in Leeds")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-42-1.png)<!-- -->
 
 This is more involved than simple `hist` but the basic idea is that
 `ggplot` is called and then the type of plot is specified. It allows
@@ -960,7 +948,7 @@ ggplot(ttw, aes(x=Pop)) +
     labs(title="Populations across MSOAs in Leeds")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-42-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-43-1.png)<!-- -->
 
 The `boxplot()` function also provides a useful way of summarising data:
 
@@ -968,7 +956,7 @@ The `boxplot()` function also provides a useful way of summarising data:
 boxplot(ttw$Pop, main = "The distribution MSOA populations in Leeds")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-43-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-44-1.png)<!-- -->
 
 And there is `ggplot` version as well but this is not so good for single
 values and better when comparing distributions of some value across
@@ -979,7 +967,7 @@ ggplot(ttw, aes(x=1, y = Pop)) +
     geom_boxplot() 
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-44-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-45-1.png)<!-- -->
 
 We can also examine the `msoa` object in the same way. The `as_tibble`
 function converts the `data.frame` of `msoa` to a `tibble format. We do
@@ -1018,7 +1006,7 @@ MSOA census areas in Leeds:
 plot(msoa["ruc11cd"])
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-46-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-47-1.png)<!-- -->
 
 The `tmap` package allows more sophisticated maps (as `ggplot2` does for
 other graphics):
@@ -1028,7 +1016,7 @@ tm_shape(msoa) +
   tm_polygons("ruc11cd")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-47-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-48-1.png)<!-- -->
 
 However, `tmap` also allows interactive graphics for example with an
 OpenStreetMap backdrop, Notice the use of transparency parameter
@@ -1045,7 +1033,7 @@ tm_shape(msoa) +
   tm_view(basemaps = "OpenStreetMap")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-48-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-49-1.png)<!-- -->
 
 ``` r
 # reset the plot mode
@@ -1056,7 +1044,7 @@ tmap_mode('plot')
 You should be able to zoom in and explore *where* these different
 classes of urban and ruralness are.
 
-## 1.8 Combining / Joining data
+## 4.3 Combining / Joining data
 
 You may have noticed that `ttw` and `msoa` have an attribute in common:
 
@@ -1122,7 +1110,7 @@ tm_shape(temp) +
   tm_view(basemaps = "OpenStreetMap")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-51-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-52-1.png)<!-- -->
 
 ``` r
 # reset the plot mode
@@ -1142,9 +1130,16 @@ ggplot(temp, aes(ruc11, Pop)) +
   labs(title="Population distributions across different Rural / Urban MSOAs in Leeds")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-52-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-53-1.png)<!-- -->
 
-## Summary
+Further resources on **ggplot2** can be found here:
+
+  - ggplot guide:
+    <http://www.sthda.com/english/wiki/be-awesome-in-ggplot2-a-practical-guide-to-be-highly-effective-r-software-and-data-visualization>
+  - ggplot cheat sheet:
+    <https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf>
+
+# 5\. Summary of work so far
 
 This session has provided some rubrics for working in R (scripts, etc)
 showed how to get data in and out of R and developed some simple
@@ -1171,24 +1166,9 @@ now\!\!\!
 
 Next we will develop some analysis of flows.
 
-### Getting UK census data
+# 6\. Flows
 
-  - census data <https://www.nomisweb.co.uk> Data downloads \> Query
-    data
-  - census areas <https://census.ukdataservice.ac.uk> specifically
-    <https://borders.ukdataservice.ac.uk/bds.html> and
-    <https://borders.ukdataservice.ac.uk/easy_download.html>
-
-## Resources
-
-  - ggplot guide:
-    <http://www.sthda.com/english/wiki/be-awesome-in-ggplot2-a-practical-guide-to-be-highly-effective-r-software-and-data-visualization>
-  - ggplot cheat sheet:
-    <https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf>
-
-# 2\. Flows
-
-## 2.1 Origins and Destinations
+## 6.1 Origins and Destinations
 
 In the second part of the practical we will look at commuting flows
 between MSOAs by bike and identify opportunities for extending the cycle
@@ -1319,12 +1299,12 @@ tm_shape(temp) +
   tm_layout(legend.position = c("left","bottom"))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-58-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-59-1.png)<!-- -->
 
 Here we can see that there are very distinct and perhaps expected
 patterns with flows into the centre of Leeds from the surrounding areas.
 
-## 2.2 Mapping Flows
+## 6.2 Mapping Flows
 
 In terms of mapping these flows, this can be done using the code below,
 adapted from <http://spatial.ly/2015/03/mapping-flows/>. The code
@@ -1372,7 +1352,7 @@ ggplot(dest.xy[which(dest.xy$trips>3),])+
   coord_equal()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-61-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-62-1.png)<!-- -->
 
 Some context can be applied by modifying the plot commands above:
 
@@ -1394,7 +1374,7 @@ geom_segment(data = dest.xy[which(dest.xy$trips>10),],
 
 ![](README_files/figure-gfm/cache1-1.png)<!-- -->
 
-## 2.3 Cycle Routes between flow areas
+## 6.3 Cycle Routes between flow areas
 
 I have had a play but perhaps this is something you could do? I would
 like to - download cycle routes - compare these with flows - identify
@@ -1411,16 +1391,3 @@ osmdata_xml (q, 'leeds.osm')
 names (sf::st_read ('leeds.osm', layer = 'points', quiet = TRUE))
 names (osmdata_sf (q, 'leeds.osm')$osm_points)
 ```
-
-## bringing data together in a spatial coding environment
-
-Then in the practical, by way of example of the issues raised int he
-lecture, we will develop something that looks at where new cycle routes
-could be developed in Leeds \#\# looking at travel to work patterns in
-Leeds (formal census data)
-
-## where cycling is supported by cycling routes (OSM data)
-
-## then identify areas that would benefit from additional cycling routes
-
-## we may even suggest potential routes\!
