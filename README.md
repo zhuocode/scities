@@ -1383,10 +1383,13 @@ Pollok](https://en.wikipedia.org/wiki/Jackson_Pollock) piece of art but
 actually the result is useful: `input_sf` is a fully fledged spatial
 object so we can do geographic operations on it, such as finding a 500 m
 buffer around each one. Instead of putting a buffer around *every* flow
-we will pick the top 100 lines for clarity:
+we will pick the top 100 lines (that have a distance) for clarity:
 
 ``` r
-input_sf100 = top_n(input_sf, n = 100, wt = total)
+input_sf$length = st_length(input_sf) %>% 
+  as.numeric()
+input_sf_lines = input_sf[input_sf$length > 0, ]
+input_sf100 = top_n(input_sf_lines, n = 100, wt = total)
 input_sf100_buffer = st_buffer(input_sf100, dist = 500)
 plot(input_sf100_buffer["total"])
 ```
@@ -1395,9 +1398,68 @@ plot(input_sf100_buffer["total"])
 
 ## 6.3 Cycle Routes between flow areas
 
-I have had a play but perhaps this is something you could do? I would
-like to - download cycle routes - compare these with flows - identify
-origin - destination pairs that could benefit from improved cycle routes
+There are 2 main types of route assignment you can do in R: on-line
+routing and off-line routing. Both are covered in the
+[Transport](https://geocompr.robinlovelace.net/transport.html) chapter
+of geocomputation with R. Online routing is easier so that’s what we’ll
+do here. Beware: this requires and API key though, so the subsequent
+code chunk is commented-out. If you get a cyclestreets API key, and save
+it as `CYCLESTREETS=your-code-goes-here` in your `.Renviron` file, you
+can reproduce it (if none of that made sense and you want to learn more,
+look it up\!):
 
-I have has a play below but I am not quite there yet\! from
-<https://cran.r-project.org/web/packages/osmdata/vignettes/osm-sf-translation.html>
+``` r
+# note: this code chunk does not run - requires API key
+input_sf100_wgs = st_transform(input_sf100, 4326)
+odf = stplanr::line2df(input_sf100_wgs)
+origins = odf[c("fx", "fy")]
+destinations = odf[c("tx", "ty")]
+route1 = cyclestreets::journey(origins[1, ], destinations[1, ])
+plot(route1)
+routes = lapply(1:100, FUN = function(i) {
+  r = cyclestreets::journey(origins[i, ], destinations[i, ])
+  r$route_number = i
+  r
+  })
+routes_df = do.call(rbind, routes)
+plot(routes_df)
+saveRDS(routes_df, "routes_df.Rds") # save result
+piggyback::pb_upload("routes_df.Rds")
+```
+
+``` r
+# note: requires routes from
+# https://github.com/ITSLeeds/scities/releases
+routes_df = readRDS("routes_df.Rds")
+plot(routes_df[routes_df$route_number == 1, ])
+```
+
+![](README_files/figure-gfm/unnamed-chunk-66-1.png)<!-- -->
+
+``` r
+plot(routes_df)
+#> Warning: plotting the first 9 out of 10 attributes; use max.plot = 10 to
+#> plot all
+```
+
+![](README_files/figure-gfm/unnamed-chunk-66-2.png)<!-- -->
+
+## 6.4 Exercises
+
+  - Identify the busiest routes in Leeds
+  - Where are the hills?
+  - Download cycleways and compare with commonly used routes - where’s
+    the biggest difference?
+
+# 7\. Wrapping-up
+
+R is a programming language. Learning any language, especially a
+programming language is hard, so don’t feel discouraged if not all your
+code runs. It takes persistance. And there are dozens of community
+groups where you can get involved and ask questions, primarily the
+[RStudio community](https://community.rstudio.com/).
+
+There is much more to learn and the recommended step, after
+consolidating the content in this practical, is to find important
+real-world problems and tackle them. R can be one more tool, a free and
+open tool, to help take on city planning challenges and injustices.
