@@ -696,7 +696,7 @@ In the second part of the practical we will look at commuting flows between MSOA
 Recall that the `temp` variable combines the spatial data and the cycling data. The rows are are each origin and the LSOA coded columns are the destinations with other variables:
 
 ```{r}
-as_tibble(temp)
+as_tibble(temp[1:4])
 ```
 
 It is interesting to examine the Origin and Destinations locations from which and to which cyclists are commuting. To this, we can create 2 variables based on the sum of all cyclists leaving from all origin locations and the sum of all cyclists arriving at ALL destination locations. 
@@ -796,13 +796,26 @@ geom_segment(data = dest.xy[which(dest.xy$trips>10),],
   scale_alpha_continuous(range = c(0.03, 0.3))+ coord_equal()
 ```
 
+The origin-destination data in `input` can be converted into a spatial (`sf`) object as follows:
+
+```{r}
+input_sf = stplanr::od2line(flow = input, msoa["code"])
+plot(input_sf)
+```
+
+This may look like a [Jackson Pollok](https://en.wikipedia.org/wiki/Jackson_Pollock) piece of art but actually the result is useful:
+`input_sf` is a fully fledged spatial object so we can do geographic operations on it, such as finding a 500 m buffer around each one.
+Instead of putting a buffer around *every* flow we will pick the top 100 lines for clarity:
+
+```{r}
+input_sf100 = top_n(input_sf, n = 100, wt = total)
+input_sf100_buffer = st_buffer(input_sf100, dist = 500)
+plot(input_sf100_buffer["total"])
+```
+
 ## 6.3 Cycle Routes between flow areas
 
-I have had a play but perhaps this is something you could do? I would like to 
-- download cycle routes 
-- compare these with flows
-- identify origin - destination pairs that could benefit from improved cycle routes
+```{r}
 
-I have has a play below but I am not quite there yet! 
-from https://cran.r-project.org/web/packages/osmdata/vignettes/osm-sf-translation.html
+```
 

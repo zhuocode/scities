@@ -1196,46 +1196,21 @@ cycling data. The rows are are each origin and the LSOA coded columns
 are the destinations with other variables:
 
 ``` r
-as_tibble(temp)
-#> # A tibble: 107 x 114
-#>    ruc11 ruc11cd label name  code    Pop E02002330 E02002331 E02002332
-#>    <fct> <fct>   <fct> <fct> <fct> <int>     <dbl>     <dbl>     <dbl>
-#>  1 Urba… C1      E080… Leed… E020…  1665      1.00      38.0      0   
-#>  2 Urba… C1      E080… Leed… E020…  1506      0         36.0      0   
-#>  3 Urba… A1      E080… Leed… E020…  1565      0          0        5.00
-#>  4 Urba… A1      E080… Leed… E020…  2346      0          0        0   
-#>  5 Rura… D1      E080… Leed… E020…  1784      0         20.0      0   
-#>  6 Rura… E1      E080… Leed… E020…  2043      0         10.0      0   
-#>  7 Rura… D1      E080… Leed… E020…  1746      0          0        1.00
-#>  8 Urba… A1      E080… Leed… E020…  1833      0          0        0   
-#>  9 Urba… A1      E080… Leed… E020…  2021      0          0        1.00
-#> 10 Urba… A1      E080… Leed… E020…  1726      0          0        0   
-#> # ... with 97 more rows, and 105 more variables: E02002333 <dbl>,
-#> #   E02002334 <dbl>, E02002335 <dbl>, E02002336 <dbl>, E02002337 <dbl>,
-#> #   E02002338 <dbl>, E02002339 <dbl>, E02002340 <dbl>, E02002341 <dbl>,
-#> #   E02002342 <dbl>, E02002343 <dbl>, E02002344 <dbl>, E02002345 <dbl>,
-#> #   E02002346 <dbl>, E02002347 <dbl>, E02002348 <dbl>, E02002349 <dbl>,
-#> #   E02002350 <dbl>, E02002351 <dbl>, E02002352 <dbl>, E02002353 <dbl>,
-#> #   E02002354 <dbl>, E02002356 <dbl>, E02002357 <dbl>, E02002358 <dbl>,
-#> #   E02002359 <dbl>, E02002360 <dbl>, E02002361 <dbl>, E02002362 <dbl>,
-#> #   E02002363 <dbl>, E02002364 <dbl>, E02002366 <dbl>, E02002367 <dbl>,
-#> #   E02002368 <dbl>, E02002369 <dbl>, E02002370 <dbl>, E02002371 <dbl>,
-#> #   E02002373 <dbl>, E02002374 <dbl>, E02002375 <dbl>, E02002376 <dbl>,
-#> #   E02002377 <dbl>, E02002379 <dbl>, E02002380 <dbl>, E02002381 <dbl>,
-#> #   E02002382 <dbl>, E02002383 <dbl>, E02002384 <dbl>, E02002385 <dbl>,
-#> #   E02002386 <dbl>, E02002387 <dbl>, E02002388 <dbl>, E02002389 <dbl>,
-#> #   E02002390 <dbl>, E02002391 <dbl>, E02002392 <dbl>, E02002393 <dbl>,
-#> #   E02002394 <dbl>, E02002395 <dbl>, E02002396 <dbl>, E02002397 <dbl>,
-#> #   E02002398 <dbl>, E02002399 <dbl>, E02002400 <dbl>, E02002401 <dbl>,
-#> #   E02002402 <dbl>, E02002403 <dbl>, E02002404 <dbl>, E02002405 <dbl>,
-#> #   E02002406 <dbl>, E02002407 <dbl>, E02002408 <dbl>, E02002409 <dbl>,
-#> #   E02002410 <dbl>, E02002411 <dbl>, E02002412 <dbl>, E02002414 <dbl>,
-#> #   E02002415 <dbl>, E02002416 <dbl>, E02002417 <dbl>, E02002418 <dbl>,
-#> #   E02002419 <dbl>, E02002420 <dbl>, E02002421 <dbl>, E02002422 <dbl>,
-#> #   E02002423 <dbl>, E02002424 <dbl>, E02002425 <dbl>, E02002426 <dbl>,
-#> #   E02002427 <dbl>, E02002428 <dbl>, E02002429 <dbl>, E02002430 <dbl>,
-#> #   E02002431 <dbl>, E02002432 <dbl>, E02002433 <dbl>, E02002434 <dbl>,
-#> #   E02002435 <dbl>, E02002436 <dbl>, E02002437 <dbl>, …
+as_tibble(temp[1:4])
+#> # A tibble: 107 x 5
+#>    ruc11       ruc11cd label     name                             geometry
+#>    <fct>       <fct>   <fct>     <fct>                       <POLYGON [m]>
+#>  1 Urban city… C1      E0800003… Leed… ((440369.2 449848, 440386.5 449822…
+#>  2 Urban city… C1      E0800003… Leed… ((443381.7 450063.5, 443376 450051…
+#>  3 Urban majo… A1      E0800003… Leed… ((419488.2 446933.7, 419494 446933…
+#>  4 Urban majo… A1      E0800003… Leed… ((422941.2 446149.6, 422943 446135…
+#>  5 Rural town… D1      E0800003… Leed… ((442102 446256, 442102 446216, 44…
+#>  6 Rural vill… E1      E0800003… Leed… ((438056.3 448191.8, 438105.3 4481…
+#>  7 Rural town… D1      E0800003… Leed… ((428851.2 445382.2, 428861.3 4453…
+#>  8 Urban majo… A1      E0800003… Leed… ((414959.3 443688.3, 414987 443671…
+#>  9 Urban majo… A1      E0800003… Leed… ((418635 442559, 418637.6 442552.9…
+#> 10 Urban majo… A1      E0800003… Leed… ((420442.4 442436.7, 420443.3 4424…
+#> # ... with 97 more rows
 ```
 
 It is interesting to examine the Origin and Destinations locations from
@@ -1390,6 +1365,33 @@ geom_segment(data = dest.xy[which(dest.xy$trips>10),],
 ```
 
 ![](README_files/figure-gfm/cache1-1.png)<!-- -->
+
+The origin-destination data in `input` can be converted into a spatial
+(`sf`) object as follows:
+
+``` r
+input_sf = stplanr::od2line(flow = input, msoa["code"])
+#> Warning in st_centroid.sf(zones): st_centroid assumes attributes are
+#> constant over geometries of x
+plot(input_sf)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-62-1.png)<!-- -->
+
+This may look like a [Jackson
+Pollok](https://en.wikipedia.org/wiki/Jackson_Pollock) piece of art but
+actually the result is useful: `input_sf` is a fully fledged spatial
+object so we can do geographic operations on it, such as finding a 500 m
+buffer around each one. Instead of putting a buffer around *every* flow
+we will pick the top 100 lines for clarity:
+
+``` r
+input_sf100 = top_n(input_sf, n = 100, wt = total)
+input_sf100_buffer = st_buffer(input_sf100, dist = 500)
+plot(input_sf100_buffer["total"])
+```
+
+![](README_files/figure-gfm/unnamed-chunk-63-1.png)<!-- -->
 
 ## 6.3 Cycle Routes between flow areas
 
