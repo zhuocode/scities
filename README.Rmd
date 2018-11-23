@@ -1,7 +1,9 @@
 ---
 title: "An Introduction Digital (spatial data) Methods"
 author: "Lex Comber and Robin Lovelace"
-output: github_document
+output:
+    github_document:
+      toc: true
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -288,7 +290,14 @@ zones_leeds = ukboundaries::lsoa2011_lds
 plot(zones_leeds)
 ```
 
-## 2.2 Alternative data sources
+## 2.2 Getting data into R
+
+There are a number of ways of loading data into you R session: 
+
+1. read a local file in proprietary format (eg an excel file or `.csv` file)
+1. read a local R formatted binary file (typically with an `.rda` or `.RData` extension)
+1. download and manipulate data from the internet - we are not going to do that in this workshop)
+1. read a file from somewhere in the internet (proprietary or R binary format) - we may do some of that.
 
 Unofficial datasets, such as those provided by the OpenStreetMap project are messier but in some cases richer.
 An exmaple is provided below, which downloads and plots parks in Leeds:
@@ -298,14 +307,14 @@ An exmaple is provided below, which downloads and plots parks in Leeds:
 # ...
 ```
 
-## 2.3 Loading data
+## 2.3 Loading data for this session
 
-There are a number of ways of loading data into you R session: 
+To download data used in this session go to https://github.com/ITSLeeds/scities/releases and click on [**data_sci.zip**](https://github.com/ITSLeeds/scities/releases/download/0.1/data_sci.zip) (or just click on that link).
 
-1. read a local file in proprietary format (eg an excel file or `.csv` file)
-1. read a local R formatted binary file (typically with an `.rda` or `.RData` extension)
-1. download and manipulate data from the internet - we are not going to do that in this workshop)
-1. read a file from somewhere in the internet (proprietary or R binary format) - we may do some of that
+Unzip the folder.
+You should now have a folder called `data_sci` on your computer.
+Navigate into it and open `.data_sci.Rproj`.
+You should now be in an R session with access to all the data needed for this tutorial.
 
 ## 2.4 Loading `.csv` format data 
 
