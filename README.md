@@ -214,7 +214,7 @@ The basic operations are
 So a typical way to do this is to eneter something similar to the below
 
 ``` r
-install.packages("<package name>"", dep = TRUE)
+install.packages("<package name>", dep = TRUE)
 ```
 
 Or you can either use the RStudio menu  
@@ -255,7 +255,7 @@ pkgs = c(
 ```
 
 ``` r
-install.packages(pkgs)
+# install.packages(pkgs)
 ```
 
     #>        sf      tmap   osmdata   stplanr tidyverse  reshape2     rgeos 
@@ -395,8 +395,16 @@ are messier but in some cases richer. An exmaple is provided below,
 which downloads and plots parks in Leeds:
 
 ``` r
-# ...
+library(osmdata)
+#> Data (c) OpenStreetMap contributors, ODbL 1.0. http://www.openstreetmap.org/copyright
+q = opq(bbox = 'leeds, uk') %>% 
+  add_osm_feature(key = "leisure", value = "park")
+res_parks = osmdata_sf(q = q)
+parks = res_parks$osm_polygons
+plot(parks$geometry)
 ```
+
+![](README_files/figure-gfm/osm-1.png)<!-- -->
 
 ## 2.3 Loading data for this session
 
@@ -568,7 +576,7 @@ outline of the data objects.
 plot(st_geometry(msoa))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
 You can also load some raster data: The code below gives an example but
 I am not sure whether to keep this
@@ -928,7 +936,7 @@ hist(ttw$Pop, breaks = 10,
   xlab = "Population", main = "Populations across MSOAs in Leeds", col = "red")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
 
 Alternatively`ggplot2` package that is loaded with the `tidyverse` van
 also be used:
@@ -940,7 +948,7 @@ ggplot(ttw, aes(x=Pop)) +
     labs(title="Populations across MSOAs in Leeds")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-42-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
 
 This is more involved than simple `hist` but the basic idea is that
 `ggplot` is called and then the type of plot is specified. It allows
@@ -957,7 +965,7 @@ ggplot(ttw, aes(x=Pop)) +
     labs(title="Populations across MSOAs in Leeds")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-43-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-42-1.png)<!-- -->
 
 The `boxplot()` function also provides a useful way of summarising data:
 
@@ -965,7 +973,7 @@ The `boxplot()` function also provides a useful way of summarising data:
 boxplot(ttw$Pop, main = "The distribution MSOA populations in Leeds")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-44-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-43-1.png)<!-- -->
 
 And there is `ggplot` version as well but this is not so good for single
 values and better when comparing distributions of some value across
@@ -976,7 +984,7 @@ ggplot(ttw, aes(x=1, y = Pop)) +
     geom_boxplot() 
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-45-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-44-1.png)<!-- -->
 
 We can also examine the `msoa` object in the same way. The `as_tibble`
 function converts the `data.frame` of `msoa` to a `tibble format. We do
@@ -1015,7 +1023,7 @@ MSOA census areas in Leeds:
 plot(msoa["ruc11cd"])
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-47-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-46-1.png)<!-- -->
 
 The `tmap` package allows more sophisticated maps (as `ggplot2` does for
 other graphics):
@@ -1025,7 +1033,7 @@ tm_shape(msoa) +
   tm_polygons("ruc11cd")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-48-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-47-1.png)<!-- -->
 
 However, `tmap` also allows interactive graphics for example with an
 OpenStreetMap backdrop, Notice the use of transparency parameter
@@ -1042,7 +1050,7 @@ tm_shape(msoa) +
   tm_view(basemaps = "OpenStreetMap")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-49-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-48-1.png)<!-- -->
 
 ``` r
 # reset the plot mode
@@ -1119,7 +1127,7 @@ tm_shape(temp) +
   tm_view(basemaps = "OpenStreetMap")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-52-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-51-1.png)<!-- -->
 
 ``` r
 # reset the plot mode
@@ -1139,7 +1147,7 @@ ggplot(temp, aes(ruc11, Pop)) +
   labs(title="Population distributions across different Rural / Urban MSOAs in Leeds")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-53-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-52-1.png)<!-- -->
 
 Further resources on **ggplot2** can be found here:
 
@@ -1308,7 +1316,7 @@ tm_shape(temp) +
   tm_layout(legend.position = c("left","bottom"))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-59-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-58-1.png)<!-- -->
 
 Here we can see that there are very distinct and perhaps expected
 patterns with flows into the centre of Leeds from the surrounding areas.
@@ -1361,7 +1369,7 @@ ggplot(dest.xy[which(dest.xy$trips>3),])+
   coord_equal()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-62-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-61-1.png)<!-- -->
 
 Some context can be applied by modifying the plot commands above:
 
@@ -1391,12 +1399,3 @@ origin - destination pairs that could benefit from improved cycle routes
 
 I have has a play below but I am not quite there yet\! from
 <https://cran.r-project.org/web/packages/osmdata/vignettes/osm-sf-translation.html>
-
-``` r
-library(osmdata)
-q <- opq (bbox = 'Leeds, UK')
-q <- add_osm_feature (q, key = 'name') # any named objects
-osmdata_xml (q, 'leeds.osm')
-names (sf::st_read ('leeds.osm', layer = 'points', quiet = TRUE))
-names (osmdata_sf (q, 'leeds.osm')$osm_points)
-```

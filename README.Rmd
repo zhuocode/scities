@@ -2,8 +2,9 @@
 title: "An Introduction Digital (spatial data) Methods"
 author: "Lex Comber and Robin Lovelace"
 output:
-    github_document:
-      toc: true
+  github_document:
+    toc: true
+    toc_depth: 2
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -179,7 +180,7 @@ The basic operations are
 So a typical way to do this is to eneter something similar to the below
 
 ```{r eval = F}
-install.packages("<package name>"", dep = TRUE)
+install.packages("<package name>", dep = TRUE)
 ```
 
 Or you can either use the RStudio menu\
@@ -211,7 +212,7 @@ pkgs = c(
 ```
 
 ```{r, eval=FALSE}
-install.packages(pkgs)
+# install.packages(pkgs)
 ```
 
 ```{r, echo=FALSE}
@@ -303,8 +304,13 @@ Unofficial datasets, such as those provided by the OpenStreetMap project are mes
 An exmaple is provided below, which downloads and plots parks in Leeds:
 
 
-```{r}
-# ...
+```{r osm}
+library(osmdata)
+q = opq(bbox = 'leeds, uk') %>% 
+  add_osm_feature(key = "leisure", value = "park")
+res_parks = osmdata_sf(q = q)
+parks = res_parks$osm_polygons
+plot(parks$geometry)
 ```
 
 ## 2.3 Loading data for this session
@@ -692,6 +698,7 @@ Recall that the `temp` variable combines the spatial data and the cycling data. 
 ```{r}
 as_tibble(temp)
 ```
+
 It is interesting to examine the Origin and Destinations locations from which and to which cyclists are commuting. To this, we can create 2 variables based on the sum of all cyclists leaving from all origin locations and the sum of all cyclists arriving at ALL destination locations. 
 
 This could be a bit convoluted using the temp object as would need to create a copy of temp without geometry and check that the order of the columns (destinations) matches the order of the rows (origins) in `ttw` and `temp`, etc etc. Probably the easiest way is to create the variables in `ttw` and then redo the join above to recreate `temp`. However we still need to check that order of the Origins (rows) matches that of the Destinations (columns) in `ttw`. The code below aligns these using the `match` function.
@@ -798,11 +805,4 @@ I have had a play but perhaps this is something you could do? I would like to
 
 I have has a play below but I am not quite there yet! 
 from https://cran.r-project.org/web/packages/osmdata/vignettes/osm-sf-translation.html
-```{r eval = F}
-library(osmdata)
-q <- opq (bbox = 'Leeds, UK')
-q <- add_osm_feature (q, key = 'name') # any named objects
-osmdata_xml (q, 'leeds.osm')
-names (sf::st_read ('leeds.osm', layer = 'points', quiet = TRUE))
-names (osmdata_sf (q, 'leeds.osm')$osm_points)
-```
+
