@@ -1434,7 +1434,7 @@ routes_df = readRDS("routes_df.Rds")
 plot(routes_df[routes_df$route_number == 1, ])
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-66-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-65-1.png)<!-- -->
 
 ``` r
 plot(routes_df)
@@ -1442,7 +1442,16 @@ plot(routes_df)
 #> plot all
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-66-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-65-2.png)<!-- -->
+
+## 6.4 Cycle Routes between flow areas
+
+The package **osmdata** can be used to download cycleways in Leeds,
+using the same technique as used above to download the paths. We need to
+find out what the `key` is first. Searching for “cycleway osm” pretty
+quickly leeds to the site
+[wiki.openstreetmap.org](https://wiki.openstreetmap.org/wiki/Key:cycleway),
+which explains how cycleways are tagged in OSM.
 
 ``` r
 osm_sf <- opq("Leeds, UK") %>%
@@ -1472,7 +1481,7 @@ And then plot the spatial object
 plot(st_geometry(osm_sf$osm_lines))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-70-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-69-1.png)<!-- -->
 
 It would be nice to see this in the context of the MSOAs but the
 `hampi_sf$osm_lines` data will need to be converted to the same spatial
@@ -1487,7 +1496,7 @@ tm_shape(osm_sf$osm_lines)+
   tm_borders(, alpha = 0.5, col = "lightgrey")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-71-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-70-1.png)<!-- -->
 
 This shows the current cycle routes and can be considered against the
 original and destinations mapped before:
@@ -1560,7 +1569,7 @@ ggplot(data.frame(x = dist.vec), aes(x = x)) +
     labs(title="Distribution of commuting cycle distances in Leeds, with IQRs")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-76-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-75-1.png)<!-- -->
 
 So most people travel between 3.8 and8.1 km during their cycling commute
 and we know that the majority of the commuting is to the centre of the
@@ -1587,7 +1596,7 @@ ttw <- ttw[index, ]
 
 Then we can map the MSOAs that are the largest destinations to confirm
 they are contiguous and then combine these and create buffers reflecting
-these distances. Here we have to work in projected
+these distances. Here we have to work in projected:
 
 ``` r
 # map 
@@ -1597,7 +1606,7 @@ tm_shape(msoa)+
   tm_polygons()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-78-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-77-1.png)<!-- -->
 
 ``` r
 # combine
@@ -1629,7 +1638,7 @@ tm_shape(city_buf_outer)+
   tm_lines(lwd = 2, col = "red")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-79-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-78-1.png)<!-- -->
 
 This suggests a number of possible area for expansion of the cycle route
 where there are large number of existing cycle commuters and a lack of
@@ -1651,7 +1660,84 @@ undertaken:
   - further analyses could examine how the development of cycle routes
     could be used to expand the cycling community
 
-## 6.4 Exercises
+## 6.5 Finding mismatches between cycle use and cycling infrastructure
+
+As a final step we will do a spatial operation to find out which cycling
+routes have most and least cycle infrastructure. This will help
+prioritise new infrastructure at the route (not just area) level. The
+first stage is to aggregate the `routes_df` object by ids to get 100
+routes:
+
+``` r
+routes_100 = aggregate(routes_df["busynance"],
+                       by = list(routes_df$route_number), "sum")
+plot(routes_100["busynance"])
+```
+
+![](README_files/figure-gfm/unnamed-chunk-79-1.png)<!-- -->
+
+Then we can convert this into the same CRS as the zones, and buffer the
+result as before:
+
+``` r
+routes_100_osgb = st_transform(routes_100, 27700)
+routes_buff = st_buffer(routes_100_osgb, dist = 500)
+```
+
+The final stage for estimating the best and worst catered-for routes in
+Leeds is to measure the distance of cycleway in each route buffer (note
+this is an overly simple approach, think how it could be improved):
+
+``` r
+cycleways_near = st_intersection(osm_sf$osm_lines, routes_buff)
+#> Warning: attribute variables are assumed to be spatially constant
+#> throughout all geometries
+plot(cycleways_near$geometry)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-81-1.png)<!-- -->
+
+We can total up the distances as follows:
+
+``` r
+cycleways_near$length = as.numeric(st_length(cycleways_near))
+routes_length_cycleway = aggregate(cycleways_near["length"], routes_buff, sum)
+```
+
+The results look like this:
+
+``` r
+plot(routes_length_cycleway, col = sf.colors(5, alpha = 0.3))
+#> Warning in plot.sf(routes_length_cycleway, col = sf.colors(5, alpha =
+#> 0.3)): col is not of length 1 or nrow(x): colors will be recycled; use pal
+#> to specify a color palette
+```
+
+![](README_files/figure-gfm/unnamed-chunk-83-1.png)<!-- -->
+
+Or with our new **tmap** skill like this (this is easier to interpret):
+
+``` r
+tm_shape(routes_length_cycleway) +
+  tm_fill(col = "length", alpha = 0.2, palette = "inferno")
+```
+
+![](README_files/figure-gfm/unnamed-chunk-84-1.png)<!-- -->
+
+How to interpret this? That’s partly up to you. One interpretation is
+that most cycle routes start overlapping (within a 500 m buffer at
+least) near the city centre. There are many routes near the city centre.
+So central routes without cycle infrastructure (that are blue/purple
+shades in the maps above) should be prioritised to benefit the highest
+number of current *and potential* cycling trips.
+
+An online representation of this can be found in the Propensity to Cycle
+Tool (PCT). Note: you can download open access data on cycle ways from
+across England and Wales using this tool - see the website
+<http://www.pct.bike/> to explore the data interactively and for more
+information.
+
+## 6.6 Exercises
 
   - Identify the busiest routes in Leeds
   - Where are the hills?
