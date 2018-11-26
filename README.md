@@ -126,6 +126,11 @@ to write your code and add annotations or comments using the `#` symbol
 - you will see these in the code snippets below. These will help you
 understand your code and what you did when come back to it later.
 
+After you have installed R and RStudio, you are ready to go. You should
+see something like this:
+
+![RStudio in action](figures/rstudio-spatial.png)
+
 If you have worded your way through the Owen Guide
 (<https://cran.r-project.org/doc/contrib/Owen-TheRGuide.pdf> up to page
 38) then you will have come across a few things that will be re-capped
@@ -136,7 +141,7 @@ here:
 <!-- end list -->
 
 ``` r
-vals <- c(4.3,7.1,6.3,5.2,3.2,2.1)
+vals = c(4.3,7.1,6.3,5.2,3.2,2.1)
 ```
 
 2.  Operations: having assigned values to object that can be manipulated
@@ -258,14 +263,19 @@ pkgs = c(
 # install.packages(pkgs)
 ```
 
-    #>        sf      tmap   osmdata   stplanr tidyverse  reshape2     rgeos 
-    #>      TRUE      TRUE      TRUE      TRUE      TRUE      TRUE      TRUE
-
 Once installed, the packages do not need to installed again for
 subsequent use. The can simply be called using the `library` function.
-Load packages at the start of your R session or scripts as follows:
+Load packages at the start of your R session or scripts with the
+`library()` function as follows:
 
-![](figures/r_example.png)<!-- -->
+``` r
+library(sf)
+library(tmap)
+library(rgeos)
+library(raster)
+library(reshape2)
+library(tidyverse)
+```
 
 You can also install packages from GitHub to get the most up-to-date
 versions or packages not on CRAN (be warned: GitHub packages may not be
@@ -375,7 +385,7 @@ zones_leeds = ukboundaries::lsoa2011_lds
 plot(zones_leeds)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ## 2.2 Getting data into R
 
@@ -408,14 +418,28 @@ plot(parks$geometry)
 
 ## 2.3 Loading data for this session
 
-To download data used in this session go to
-<https://github.com/ITSLeeds/scities/releases> and click on
-[**data\_sci.zip**](https://github.com/ITSLeeds/scities/releases/download/0.1/data_sci.zip)
-(or just click on that link).
+Before you load data ensure you are in a new project. You can do this in
+2 ways:
 
-Unzip the folder. You should now have a folder called `data_sci` on your
-computer. Navigate into it and open `.data_sci.Rproj`. You should now be
-in an R session with access to all the data needed for this tutorial.
+1.  Go to File \> New Project in RStudio. Choose a suitable name.
+2.  Navigate to
+    [github.com/ITSLeeds/scities](https://github.com/ITSLeeds/scities)
+    and click ‘Clone or download’. Download and unzip the .Zip file.
+    Open the file `scities.Rproj` in the zipped file. The result is
+    shown below (see the ‘scities’ project name in the top right-hand
+    corner in Figure 1 above).
+
+To download **data** used in this session go to
+[github.com/ITSLeeds/scities](https://github.com/ITSLeeds/scities),
+click on ‘[Releases](https://github.com/ITSLeeds/scities/releases)’ and
+and click on
+[**data\_sci.zip**](https://github.com/ITSLeeds/scities/releases/download/0.1/data_sci.zip).
+
+Unzip the contents of the folder into the same working directory where
+you created a project. You should see the data, including
+`LSOA_BoundaryData` in the Files panel of RStudio as shown below. You
+should now be in an R session with access to all the data needed for
+this tutorial.
 
 ## 2.4 Loading `.csv` format data
 
@@ -445,7 +469,7 @@ to load the data:
 
 ``` r
 # load the data
-ttw <- read.csv("msoa_data_in.csv")
+ttw = read.csv("msoa_data_in.csv")
 ```
 
 This loads a data table of 107 rows and 109 columns. These are data for
@@ -463,63 +487,23 @@ each MSOA ***to*** each MSOA. Data with from-to information are known as
 dim(ttw)
 #> [1] 107 109
 ## column / variable names
-names(ttw)
-#>   [1] "From_MSOA" "Pop"       "E02002330" "E02002331" "E02002332"
-#>   [6] "E02002333" "E02002334" "E02002335" "E02002336" "E02002337"
-#>  [11] "E02002338" "E02002339" "E02002340" "E02002341" "E02002342"
-#>  [16] "E02002343" "E02002344" "E02002345" "E02002346" "E02002347"
-#>  [21] "E02002348" "E02002349" "E02002350" "E02002351" "E02002352"
-#>  [26] "E02002353" "E02002354" "E02002356" "E02002357" "E02002358"
-#>  [31] "E02002359" "E02002360" "E02002361" "E02002362" "E02002363"
-#>  [36] "E02002364" "E02002366" "E02002367" "E02002368" "E02002369"
-#>  [41] "E02002370" "E02002371" "E02002373" "E02002374" "E02002375"
-#>  [46] "E02002376" "E02002377" "E02002379" "E02002380" "E02002381"
-#>  [51] "E02002382" "E02002383" "E02002384" "E02002385" "E02002386"
-#>  [56] "E02002387" "E02002388" "E02002389" "E02002390" "E02002391"
-#>  [61] "E02002392" "E02002393" "E02002394" "E02002395" "E02002396"
-#>  [66] "E02002397" "E02002398" "E02002399" "E02002400" "E02002401"
-#>  [71] "E02002402" "E02002403" "E02002404" "E02002405" "E02002406"
-#>  [76] "E02002407" "E02002408" "E02002409" "E02002410" "E02002411"
-#>  [81] "E02002412" "E02002414" "E02002415" "E02002416" "E02002417"
-#>  [86] "E02002418" "E02002419" "E02002420" "E02002421" "E02002422"
-#>  [91] "E02002423" "E02002424" "E02002425" "E02002426" "E02002427"
-#>  [96] "E02002428" "E02002429" "E02002430" "E02002431" "E02002432"
-#> [101] "E02002433" "E02002434" "E02002435" "E02002436" "E02002437"
-#> [106] "E02006852" "E02006861" "E02006875" "E02006876"
-## look at the first 6 rows and 7 columns
-ttw[1:6,1:7]
-#>   From_MSOA  Pop   E02002330   E02002331   E02002332   E02002333
-#> 1 E02002330 1665 0.000600601 0.022822823 0.000000000 0.001201201
-#> 2 E02002331 1506 0.000000000 0.023904382 0.000000000 0.000000000
-#> 3 E02002332 1565 0.000000000 0.000000000 0.003194888 0.005111821
-#> 4 E02002333 2346 0.000000000 0.000000000 0.000000000 0.006393862
-#> 5 E02002334 1784 0.000000000 0.011210762 0.000000000 0.000000000
-#> 6 E02002335 2043 0.000000000 0.004894763 0.000000000 0.000000000
-#>     E02002334
-#> 1 0.000600601
-#> 2 0.000664011
-#> 3 0.000000000
-#> 4 0.000000000
-#> 5 0.006165919
-#> 6 0.000000000
-## use the sumamry function for the first 7 columns
-summary(ttw[,1:7])
-#>      From_MSOA        Pop         E02002330           E02002331        
-#>  E02002330:  1   Min.   :1421   Min.   :0.000e+00   Min.   :0.0000000  
-#>  E02002331:  1   1st Qu.:1830   1st Qu.:0.000e+00   1st Qu.:0.0000000  
-#>  E02002332:  1   Median :2146   Median :0.000e+00   Median :0.0000000  
-#>  E02002333:  1   Mean   :2209   Mean   :1.047e-05   Mean   :0.0006434  
-#>  E02002334:  1   3rd Qu.:2542   3rd Qu.:0.000e+00   3rd Qu.:0.0000000  
-#>  E02002335:  1   Max.   :4151   Max.   :6.006e-04   Max.   :0.0239044  
-#>  (Other)  :101                                                         
-#>    E02002332           E02002333           E02002334        
-#>  Min.   :0.000e+00   Min.   :0.0000000   Min.   :0.000e+00  
-#>  1st Qu.:0.000e+00   1st Qu.:0.0000000   1st Qu.:0.000e+00  
-#>  Median :0.000e+00   Median :0.0000000   Median :0.000e+00  
-#>  Mean   :7.022e-05   Mean   :0.0001971   Mean   :7.902e-05  
-#>  3rd Qu.:0.000e+00   3rd Qu.:0.0000000   3rd Qu.:0.000e+00  
-#>  Max.   :3.195e-03   Max.   :0.0063939   Max.   :6.166e-03  
-#> 
+head(names(ttw))
+#> [1] "From_MSOA" "Pop"       "E02002330" "E02002331" "E02002332" "E02002333"
+## look at the first 2 rows and 3 columns
+ttw[1:3, 1:2]
+#>   From_MSOA  Pop
+#> 1 E02002330 1665
+#> 2 E02002331 1506
+#> 3 E02002332 1565
+## use the sumamry function for the second column
+summary(ttw[2])
+#>       Pop      
+#>  Min.   :1421  
+#>  1st Qu.:1830  
+#>  Median :2146  
+#>  Mean   :2209  
+#>  3rd Qu.:2542  
+#>  Max.   :4151
 ```
 
 The default for `read.csv` is that the file has a header (i.e. the first
@@ -540,14 +524,7 @@ spatial data:
 
 ``` r
 # load Spatial data  
-msoa <- st_read("MSOA_BoundaryData/england_msoa_ru_classn_2011.dbf")  
-#> Reading layer `england_msoa_ru_classn_2011' from data source `/mnt/27bfad9a-3474-4e61-9a43-0156ebc67d67/home/robin/ITSLeeds/scities/MSOA_BoundaryData/england_msoa_ru_classn_2011.dbf' using driver `ESRI Shapefile'
-#> Simple feature collection with 107 features and 5 fields
-#> geometry type:  POLYGON
-#> dimension:      XY
-#> bbox:           xmin: 413220.1 ymin: 422595.3 xmax: 446879 ymax: 450175.3
-#> epsg (SRID):    NA
-#> proj4string:    +proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +datum=OSGB36 +units=m +no_defs
+msoa = read_sf("MSOA_BoundaryData/england_msoa_ru_classn_2011.dbf")  
 ```
 
 This data was obtained from the UK Census Data service. It simply
@@ -555,16 +532,18 @@ contains outlines of the MSOA areas. The data attributes can be examined
 using the `as_tibble` function from the `tidyverse`:
 
 ``` r
-head(as_tibble(msoa))
-#> # A tibble: 6 x 6
-#>   ruc11     ruc11cd label    name   code                          geometry
-#>   <fct>     <fct>   <fct>    <fct>  <fct>                    <POLYGON [m]>
-#> 1 Urban ci… C1      E080000… Leeds… E020… ((440369.2 449848, 440386.5 449…
-#> 2 Urban ci… C1      E080000… Leeds… E020… ((443381.7 450063.5, 443376 450…
-#> 3 Urban ma… A1      E080000… Leeds… E020… ((419488.2 446933.7, 419494 446…
-#> 4 Urban ma… A1      E080000… Leeds… E020… ((422941.2 446149.6, 422943 446…
-#> 5 Rural to… D1      E080000… Leeds… E020… ((442102 446256, 442102 446216,…
-#> 6 Rural vi… E1      E080000… Leeds… E020… ((438056.3 448191.8, 438105.3 4…
+head(as_tibble(msoa), 2)
+#> Simple feature collection with 2 features and 5 fields
+#> geometry type:  POLYGON
+#> dimension:      XY
+#> bbox:           xmin: 438153 ymin: 445101.7 xmax: 446446 ymax: 450175.3
+#> epsg (SRID):    NA
+#> proj4string:    +proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +datum=OSGB36 +units=m +no_defs
+#> # A tibble: 2 x 6
+#>   ruc11    ruc11cd label    name   code                           geometry
+#>   <chr>    <chr>   <chr>    <chr>  <chr>                     <POLYGON [m]>
+#> 1 Urban c… C1      E080000… Leeds… E020… ((440369.2 449848, 440386.5 4498…
+#> 2 Urban c… C1      E080000… Leeds… E020… ((443381.7 450063.5, 443376 4500…
 ```
 
 You can also examine the spatial properties of the data using the `plot`
@@ -576,7 +555,7 @@ outline of the data objects.
 plot(st_geometry(msoa))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
 You can also load some raster data: The code below gives an example but
 I am not sure whether to keep this
@@ -584,16 +563,16 @@ in\!
 
 ``` r
 setwd( "/Users/geoaco/Desktop/my_docs_mac/leeds_work/research/COSIT/paperanal/new_anal_v3/")
-new.proj <- CRS("+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.999601272 +x_0=400000 +y_0=-100000
+new.proj = CRS("+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.999601272 +x_0=400000 +y_0=-100000
 + +ellps=airy +towgs84=375,-111,431,0,0,0,0 +units=m +no_defs")
-y  <- as(readGDAL("2011_all/2011_b1.rst"), "RasterLayer"); proj4string(y)  <- new.proj
-x1 <- as(readGDAL("2011_all/2011_b2.rst"), "RasterLayer"); proj4string(x1) <- new.proj
-x2 <- as(readGDAL("2011_all/2011_b3.rst"), "RasterLayer"); proj4string(x2) <- new.proj
-x3 <- as(readGDAL("2011_all/2011_b4.rst"), "RasterLayer"); proj4string(x3) <- new.proj
-r <- stack(y,x1,x2,x3)
-ex <- extent(604000, 619000, 290000, 305000)
-rc <- crop(r, ex) 
-names(rc) <- c("y", "x1", "x2","x3")
+y  = as(readGDAL("2011_all/2011_b1.rst"), "RasterLayer"); proj4string(y)  = new.proj
+x1 = as(readGDAL("2011_all/2011_b2.rst"), "RasterLayer"); proj4string(x1) = new.proj
+x2 = as(readGDAL("2011_all/2011_b3.rst"), "RasterLayer"); proj4string(x2) = new.proj
+x3 = as(readGDAL("2011_all/2011_b4.rst"), "RasterLayer"); proj4string(x3) = new.proj
+r = stack(y,x1,x2,x3)
+ex = extent(604000, 619000, 290000, 305000)
+rc = crop(r, ex) 
+names(rc) = c("y", "x1", "x2","x3")
 save(rc, file = "rc.RData")
 ```
 
@@ -603,7 +582,7 @@ png(filename = "rc.png", w = 8, h = 8, units = "in", res = 600)
 plotRGB(stack(rc), 3,2,1, stretch="lin")
 scalebar(5000, type = "bar", xy = c(613246.3, 290702.6), divs = 4, col = "white", below = "m")
 dev.off()
-df.rc <- data.frame(getValues(rc))
+df.rc = data.frame(getValues(rc))
 ```
 
 ![](figures/rc.png)<!-- -->
@@ -860,7 +839,7 @@ bit easier to interpret by normalising these proportions so that they
 describe the numbers of commuters by bike per 1000 commuters
 
 ``` r
-ttw[, 3:109] <- ttw[,2] * ttw[, -c(1,2)]
+ttw[, 3:109] = ttw[,2] * ttw[, -c(1,2)]
 ttw[1:6, 1:10]
 #>   From_MSOA  Pop E02002330 E02002331 E02002332 E02002333 E02002334
 #> 1 E02002330 1665  1.000001        38         0         2  1.000001
@@ -936,7 +915,7 @@ hist(ttw$Pop, breaks = 10,
   xlab = "Population", main = "Populations across MSOAs in Leeds", col = "red")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
 
 Alternatively`ggplot2` package that is loaded with the `tidyverse` van
 also be used:
@@ -948,7 +927,7 @@ ggplot(ttw, aes(x=Pop)) +
     labs(title="Populations across MSOAs in Leeds")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
 
 This is more involved than simple `hist` but the basic idea is that
 `ggplot` is called and then the type of plot is specified. It allows
@@ -965,7 +944,7 @@ ggplot(ttw, aes(x=Pop)) +
     labs(title="Populations across MSOAs in Leeds")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-42-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
 
 The `boxplot()` function also provides a useful way of summarising data:
 
@@ -973,7 +952,7 @@ The `boxplot()` function also provides a useful way of summarising data:
 boxplot(ttw$Pop, main = "The distribution MSOA populations in Leeds")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-43-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-42-1.png)<!-- -->
 
 And there is `ggplot` version as well but this is not so good for single
 values and better when comparing distributions of some value across
@@ -984,7 +963,7 @@ ggplot(ttw, aes(x=1, y = Pop)) +
     geom_boxplot() 
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-44-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-43-1.png)<!-- -->
 
 We can also examine the `msoa` object in the same way. The `as_tibble`
 function converts the `data.frame` of `msoa` to a `tibble format. We do
@@ -993,22 +972,14 @@ similar to`data.frame\` but a bit smarter
 
 ``` r
 summary(as_tibble(msoa))
-#>                          ruc11    ruc11cd                label    
-#>  Rural town and fringe      : 5   A1:94   E08000035E02002330:  1  
-#>  Rural village and dispersed: 2   C1: 6   E08000035E02002331:  1  
-#>  Urban city and town        : 6   D1: 5   E08000035E02002332:  1  
-#>  Urban major conurbation    :94   E1: 2   E08000035E02002333:  1  
-#>                                           E08000035E02002334:  1  
-#>                                           E08000035E02002335:  1  
-#>                                           (Other)           :101  
-#>         name            code              geometry  
-#>  Leeds 001:  1   E02002330:  1   POLYGON      :107  
-#>  Leeds 002:  1   E02002331:  1   epsg:NA      :  0  
-#>  Leeds 003:  1   E02002332:  1   +proj=tmer...:  0  
-#>  Leeds 004:  1   E02002333:  1                      
-#>  Leeds 005:  1   E02002334:  1                      
-#>  Leeds 006:  1   E02002335:  1                      
-#>  (Other)  :101   (Other)  :101
+#>     ruc11             ruc11cd             label          
+#>  Length:107         Length:107         Length:107        
+#>  Class :character   Class :character   Class :character  
+#>  Mode  :character   Mode  :character   Mode  :character  
+#>      name               code                    geometry  
+#>  Length:107         Length:107         POLYGON      :107  
+#>  Class :character   Class :character   epsg:NA      :  0  
+#>  Mode  :character   Mode  :character   +proj=tmer...:  0
 ```
 
 This shows that we have some categorical variables (actual a Rural and
@@ -1023,7 +994,7 @@ MSOA census areas in Leeds:
 plot(msoa["ruc11cd"])
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-46-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-45-1.png)<!-- -->
 
 The `tmap` package allows more sophisticated maps (as `ggplot2` does for
 other graphics):
@@ -1033,7 +1004,7 @@ tm_shape(msoa) +
   tm_polygons("ruc11cd")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-47-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-46-1.png)<!-- -->
 
 However, `tmap` also allows interactive graphics for example with an
 OpenStreetMap backdrop, Notice the use of transparency parameter
@@ -1050,7 +1021,7 @@ tm_shape(msoa) +
   tm_view(basemaps = "OpenStreetMap")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-48-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-47-1.png)<!-- -->
 
 ``` r
 # reset the plot mode
@@ -1069,16 +1040,17 @@ You may have noticed that `ttw` and `msoa` have an attribute in common:
 head(ttw$From_LSOA)
 #> NULL
 head(msoa$code)
-#> [1] E02002330 E02002331 E02002332 E02002333 E02002334 E02002335
-#> 107 Levels: E02002330 E02002331 E02002332 E02002333 E02002334 ... E02006876
+#> [1] "E02002330" "E02002331" "E02002332" "E02002333" "E02002334" "E02002335"
 ```
 
 These can be used to link or join the data together.
 
 ``` r
-temp <- full_join(msoa, ttw, by = c("code" = "From_MSOA"))
+temp = full_join(msoa, ttw, by = c("code" = "From_MSOA"))
+#> Warning: Column `code`/`From_MSOA` joining character vector and factor,
+#> coercing into character vector
 class(temp)
-#> [1] "sf"         "data.frame"
+#> [1] "sf"         "tbl_df"     "tbl"        "data.frame"
 names(temp)
 #>   [1] "ruc11"     "ruc11cd"   "label"     "name"      "code"     
 #>   [6] "Pop"       "E02002330" "E02002331" "E02002332" "E02002333"
@@ -1104,9 +1076,15 @@ names(temp)
 #> [106] "E02002434" "E02002435" "E02002436" "E02002437" "E02006852"
 #> [111] "E02006861" "E02006875" "E02006876" "geometry"
 head(as_tibble(temp[, 1:6]))
+#> Simple feature collection with 6 features and 6 fields
+#> geometry type:  POLYGON
+#> dimension:      XY
+#> bbox:           xmin: 417686.2 ymin: 440127.7 xmax: 446446 ymax: 450175.3
+#> epsg (SRID):    NA
+#> proj4string:    +proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +datum=OSGB36 +units=m +no_defs
 #> # A tibble: 6 x 7
 #>   ruc11    ruc11cd label   name  code    Pop                      geometry
-#>   <fct>    <fct>   <fct>   <fct> <fct> <int>                 <POLYGON [m]>
+#>   <chr>    <chr>   <chr>   <chr> <chr> <int>                 <POLYGON [m]>
 #> 1 Urban c… C1      E08000… Leed… E020…  1665 ((440369.2 449848, 440386.5 …
 #> 2 Urban c… C1      E08000… Leed… E020…  1506 ((443381.7 450063.5, 443376 …
 #> 3 Urban m… A1      E08000… Leed… E020…  1565 ((419488.2 446933.7, 419494 …
@@ -1127,7 +1105,7 @@ tm_shape(temp) +
   tm_view(basemaps = "OpenStreetMap")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-51-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-50-1.png)<!-- -->
 
 ``` r
 # reset the plot mode
@@ -1147,7 +1125,7 @@ ggplot(temp, aes(ruc11, Pop)) +
   labs(title="Population distributions across different Rural / Urban MSOAs in Leeds")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-52-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-51-1.png)<!-- -->
 
 Further resources on **ggplot2** can be found here:
 
@@ -1197,9 +1175,15 @@ are the destinations with other variables:
 
 ``` r
 as_tibble(temp[1:4])
+#> Simple feature collection with 107 features and 4 fields
+#> geometry type:  POLYGON
+#> dimension:      XY
+#> bbox:           xmin: 413220.1 ymin: 422595.3 xmax: 446879 ymax: 450175.3
+#> epsg (SRID):    NA
+#> proj4string:    +proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +datum=OSGB36 +units=m +no_defs
 #> # A tibble: 107 x 5
 #>    ruc11       ruc11cd label     name                             geometry
-#>    <fct>       <fct>   <fct>     <fct>                       <POLYGON [m]>
+#>    <chr>       <chr>   <chr>     <chr>                       <POLYGON [m]>
 #>  1 Urban city… C1      E0800003… Leed… ((440369.2 449848, 440386.5 449822…
 #>  2 Urban city… C1      E0800003… Leed… ((443381.7 450063.5, 443376 450051…
 #>  3 Urban majo… A1      E0800003… Leed… ((419488.2 446933.7, 419494 446933…
@@ -1229,7 +1213,7 @@ Destinations (columns) in `ttw`. The code below aligns these using the
 `match` function.
 
 ``` r
-index <- match(names(ttw)[3:109], ttw$From_MSOA)
+index = match(names(ttw)[3:109], ttw$From_MSOA)
 # examine index
 index
 #>   [1]   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17
@@ -1241,15 +1225,15 @@ index
 #> [103] 103 104 105 106 107
 # then use it to reorder the rows 
 # ie the second element in the match call
-ttw <- ttw[index,]
+ttw = ttw[index,]
 ```
 
 Then, now we are confident that the row and column ordering are the same
 for the MSOAs, we can calculate the origin and destination totals
 
 ``` r
-ttw$OriginSum <- round(rowSums(ttw[3:109]),0)
-ttw$DestSum <- round(colSums(ttw[3:109]),0)
+ttw$OriginSum = round(rowSums(ttw[3:109]),0)
+ttw$DestSum = round(colSums(ttw[3:109]),0)
 ```
 
 If you examine these then it is evident that the origin values are more
@@ -1279,7 +1263,9 @@ Now `temp` can be recreated and this time will include these new
 attributes:
 
 ``` r
-temp <- full_join(msoa, ttw, by = c("code" = "From_MSOA"))
+temp = full_join(msoa, ttw, by = c("code" = "From_MSOA"))
+#> Warning: Column `code`/`From_MSOA` joining character vector and factor,
+#> coercing into character vector
 ```
 
 and the origins and destination values of people commuting by bike can
@@ -1291,7 +1277,7 @@ tm_shape(temp) +
   tm_layout(legend.position = c("left","bottom"))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-58-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-57-1.png)<!-- -->
 
 Here we can see that there are very distinct and perhaps expected
 patterns with flows into the centre of Leeds from the surrounding areas.
@@ -1306,25 +1292,25 @@ MSOA area) and then merges these together
 
 ``` r
 # melt the data
-input <- melt(ttw[,-c(2, 110, 111)], id.vars = "From_MSOA")
-names(input)<- c("origin", "destination","total")
+input = melt(ttw[,-c(2, 110, 111)], id.vars = "From_MSOA")
+names(input)= c("origin", "destination","total")
 # create centroids with a Code reference
-centroids <- data.frame(st_coordinates(st_centroid(msoa)), Code = msoa$code)
+centroids = data.frame(st_coordinates(st_centroid(msoa)), Code = msoa$code)
 #> Warning in st_centroid.sf(msoa): st_centroid assumes attributes are
 #> constant over geometries of x
 # merge to get the xy coordinates joined to the origins
-or.xy<- merge(input, centroids, by.x="origin", by.y="Code")
-names(or.xy)<- c("origin", "destination", "trips", "oX", "oY")
+or.xy= merge(input, centroids, by.x="origin", by.y="Code")
+names(or.xy)= c("origin", "destination", "trips", "oX", "oY")
 # merge to get the xy coordinates joined to the destinations
-dest.xy<-  merge(or.xy, centroids, by.x="destination", by.y="Code")
-names(dest.xy)<- c("origin", "destination", "trips", "oX", "oY", "dX", "dY")
+dest.xy=  merge(or.xy, centroids, by.x="destination", by.y="Code")
+names(dest.xy)= c("origin", "destination", "trips", "oX", "oY", "dX", "dY")
 ```
 
 This having been done the flows greater than 3, can be plotted using
 `ggplot`. First some parameters need to be set:
 
 ``` r
-xquiet<- scale_x_continuous("", breaks=NULL)
+xquiet= scale_x_continuous("", breaks=NULL)
 yquiet<-scale_y_continuous("", breaks=NULL)
 quiet<-list(xquiet, yquiet)
 ```
@@ -1344,13 +1330,13 @@ ggplot(dest.xy[which(dest.xy$trips>3),])+
   coord_equal()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-61-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-60-1.png)<!-- -->
 
 Some context can be applied by modifying the plot commands above:
 
 ``` r
 # prepare an outline of the study area 
-pols <- SpatialPolygonsDataFrame(gUnaryUnion(as(msoa, "Spatial")), data = data.frame(1))
+pols = SpatialPolygonsDataFrame(gUnaryUnion(as(msoa, "Spatial")), data = data.frame(1))
 pols@data$id = rownames(pols@data)
 pols.points = fortify(pols, region="id")
 pols.df = left_join(pols.points, pols@data, by="id")
@@ -1376,7 +1362,7 @@ input_sf = stplanr::od2line(flow = input, msoa["code"])
 plot(input_sf)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-62-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-61-1.png)<!-- -->
 
 This may look like a [Jackson
 Pollok](https://en.wikipedia.org/wiki/Jackson_Pollock) piece of art but
@@ -1394,7 +1380,7 @@ input_sf100_buffer = st_buffer(input_sf100, dist = 500)
 plot(input_sf100_buffer["total"])
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-63-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-62-1.png)<!-- -->
 
 ## 6.3 Routing to represent cycling behaviour
 
@@ -1434,7 +1420,7 @@ routes_df = readRDS("routes_df.Rds")
 plot(routes_df[routes_df$route_number == 1, ])
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-65-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-64-1.png)<!-- -->
 
 ``` r
 plot(routes_df)
@@ -1442,7 +1428,7 @@ plot(routes_df)
 #> plot all
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-65-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-64-2.png)<!-- -->
 
 ## 6.4 Cycle Routes between flow areas
 
@@ -1454,7 +1440,7 @@ quickly leeds to the site
 which explains how cycleways are tagged in OSM.
 
 ``` r
-osm_sf <- opq("Leeds, UK") %>%
+osm_sf = opq("Leeds, UK") %>%
             add_osm_feature(key = "cycleway") %>%
             osmdata_sf()
 saveRDS(osm_sf, "osm_sf.Rds")
@@ -1481,7 +1467,7 @@ And then plot the spatial object
 plot(st_geometry(osm_sf$osm_lines))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-69-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-68-1.png)<!-- -->
 
 It would be nice to see this in the context of the MSOAs but the
 `hampi_sf$osm_lines` data will need to be converted to the same spatial
@@ -1489,14 +1475,14 @@ reference as the MSOAs: from WGS84 (latitude and longitude) in decimal
 degrees to Ordnance Survey’s British National Grid in metres:
 
 ``` r
-osm_sf$osm_lines <- st_transform(osm_sf$osm_lines, crs = 27700)
+osm_sf$osm_lines = st_transform(osm_sf$osm_lines, crs = 27700)
 tm_shape(osm_sf$osm_lines)+
   tm_lines(lwd = 2, col = "red")+
   tm_shape(msoa)+
   tm_borders(, alpha = 0.5, col = "lightgrey")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-70-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-69-1.png)<!-- -->
 
 This shows the current cycle routes and can be considered against the
 original and destinations mapped before:
@@ -1525,22 +1511,22 @@ head(dest.xy)
 #> 5 E02002330   E02002362 0.000000 425567.2 437266.4 439488.1 448310.2
 #> 6 E02002330   E02002420 0.000000 429434.6 430131.7 439488.1 448310.2
 # function to calulate distace in km between MSOAs
-calc.dist <- function(x){
+calc.dist = function(x){
   return( sqrt( (x[3]-x[1])^2 + (x[4]-x[3])^2 ) /1000)
 }
 # create a new variable in dest.xy
-dest.xy$dist <- apply(dest.xy[,4:7], 1,calc.dist )
+dest.xy$dist = apply(dest.xy[,4:7], 1,calc.dist )
 ```
 
 Then we can use this to generate a distribution of distances cycled to
 work
 
 ``` r
-trip.counts <- round(dest.xy$trips, 0)
-dist.vec <- vector()
+trip.counts = round(dest.xy$trips, 0)
+dist.vec = vector()
 for( i in 1: length(trip.counts)) {
-  dist.i <- rep(dest.xy$dist[i], trip.counts[i])
-  dist.vec <- append(dist.vec, dist.i)
+  dist.i = rep(dest.xy$dist[i], trip.counts[i])
+  dist.vec = append(dist.vec, dist.i)
 }
 ```
 
@@ -1569,7 +1555,7 @@ ggplot(data.frame(x = dist.vec), aes(x = x)) +
     labs(title="Distribution of commuting cycle distances in Leeds, with IQRs")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-75-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-74-1.png)<!-- -->
 
 So most people travel between 3.8 and8.1 km during their cycling commute
 and we know that the majority of the commuting is to the centre of the
@@ -1582,7 +1568,7 @@ First we need to make an index to align and reorder `ttw` to make sure
 the data rows are aligned.
 
 ``` r
-index <- match(msoa$code, ttw$From_MSOA)
+index = match(msoa$code, ttw$From_MSOA)
 index 
 #>   [1]   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17
 #>  [18]  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34
@@ -1591,7 +1577,7 @@ index
 #>  [69] 101 102 103  50  51  52  53  54  55  56  57  58  59  60  61  62  63
 #>  [86]  64  65  66  76  77  78  79  80  81  82  83  84  67  71  72  73  74
 #> [103]  75 104 105 106 107
-ttw <- ttw[index, ]
+ttw = ttw[index, ]
 ```
 
 Then we can map the MSOAs that are the largest destinations to confirm
@@ -1606,11 +1592,11 @@ tm_shape(msoa)+
   tm_polygons()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-77-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-76-1.png)<!-- -->
 
 ``` r
 # combine
-city <- st_union(msoa[ttw$DestSum > 150,])
+city = st_union(msoa[ttw$DestSum > 150,])
 city_buf_inner <-st_buffer(city, 3800) 
 city_buf_outer <-st_buffer(city, 8100) 
 ```
@@ -1638,7 +1624,7 @@ tm_shape(city_buf_outer)+
   tm_lines(lwd = 2, col = "red")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-78-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-77-1.png)<!-- -->
 
 This suggests a number of possible area for expansion of the cycle route
 where there are large number of existing cycle commuters and a lack of
@@ -1674,7 +1660,7 @@ routes_100 = aggregate(routes_df["busynance"],
 plot(routes_100["busynance"])
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-79-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-78-1.png)<!-- -->
 
 Then we can convert this into the same CRS as the zones, and buffer the
 result as before:
@@ -1695,7 +1681,7 @@ cycleways_near = st_intersection(osm_sf$osm_lines, routes_buff)
 plot(cycleways_near$geometry)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-81-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-80-1.png)<!-- -->
 
 We can total up the distances as follows:
 
@@ -1713,7 +1699,7 @@ plot(routes_length_cycleway, col = sf.colors(5, alpha = 0.3))
 #> to specify a color palette
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-83-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-82-1.png)<!-- -->
 
 Or with our new **tmap** skill like this (this is easier to interpret):
 
@@ -1722,7 +1708,7 @@ tm_shape(routes_length_cycleway) +
   tm_fill(col = "length", alpha = 0.2, palette = "inferno")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-84-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-83-1.png)<!-- -->
 
 How to interpret this? That’s partly up to you. One interpretation is
 that most cycle routes start overlapping (within a 500 m buffer at

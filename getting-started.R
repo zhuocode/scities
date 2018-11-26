@@ -8,5 +8,5 @@ install.packages("sf") # install sf package for 'spatial powers'
 library(sf) # attach the package - use it's functions without sf::
 ?plot #  get help on the plot function
 # read-in data
-nc = st_read(system.file("gpkg/nc.gpkg", package="sf"))
+nc = read_sf(system.file("gpkg/nc.gpkg", package="sf"))
 plot(nc)

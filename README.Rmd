@@ -45,7 +45,6 @@ browseURL("scities-digi-methods.pdf") # looks good
 piggyback::pb_upload("scities-digi-methods.pdf")
 ```
 
-
 # 1. Introduction
 
 The goal of scities is to provide teaching materials for the Digital Methods workshop as part of the Sustainable Cities Masters at the University of Leeds.
@@ -133,12 +132,20 @@ You are not expected to type all the code in - you should be able to copy and pa
 
 A further minor point is that in the code comments are prefixed by $#$ and are ignored by R when entered into the console. You should remember to write your code and add annotations or comments using the `#` symbol - you will see these in the code snippets below. These will help you understand your code and what you did when come back to it later.
 
+After you have installed R and RStudio, you are ready to go.
+You should see something like this:
+
+```{r, echo=FALSE, fig.cap="RStudio in action"}
+knitr::include_graphics("figures/rstudio-spatial.png")
+```
+
+
 If you have worded your way through the Owen Guide (https://cran.r-project.org/doc/contrib/Owen-TheRGuide.pdf up to page 38) then you will have come across a few things that will be re-capped here: 
 
 1. Assignment: this is the basic process of giving R objects values
 
 ```{r}
-vals <- c(4.3,7.1,6.3,5.2,3.2,2.1)
+vals = c(4.3,7.1,6.3,5.2,3.2,2.1)
 ```
 
 2. Operations: having assigned values to object that can be manipulated
@@ -221,7 +228,7 @@ pkgs = c(
 # install.packages(pkgs)
 ```
 
-```{r, echo=FALSE}
+```{r, include=FALSE}
 pkgs_installed = pkgs %in% installed.packages()
 names(pkgs_installed) = pkgs
 pkgs_installed
@@ -230,15 +237,9 @@ if(!all(pkgs_installed)) {
 }
 ```
 
-Once installed, the packages do not need to installed again for subsequent use. The can simply be called using the `library` function. Load packages at the start of your R session or scripts as follows:
+Once installed, the packages do not need to installed again for subsequent use. The can simply be called using the `library` function. Load packages at the start of your R session or scripts with the `library()` function as follows:
 
-
-```{r, echo=F, cache = T, fig.width = 10}
-knitr::include_graphics("figures/r_example.png")
-```
-
-
-```{r eval=T, echo=F, message=F, warning=F, cache = F, results='hide'}
+```{r library, message=F, warning=F, cache = F, results='hide'}
 library(sf)
 library(tmap)
 library(rgeos)
@@ -321,36 +322,45 @@ plot(parks$geometry)
 
 ## 2.3 Loading data for this session
 
-To download data used in this session go to https://github.com/ITSLeeds/scities/releases and click on [**data_sci.zip**](https://github.com/ITSLeeds/scities/releases/download/0.1/data_sci.zip) (or just click on that link).
+Before you load data ensure you are in a new project.
+You can do this in 2 ways:
 
-Unzip the folder.
-You should now have a folder called `data_sci` on your computer.
-Navigate into it and open `.data_sci.Rproj`.
+1. Go to File > New Project in RStudio. Choose a suitable name.
+2. Navigate to [github.com/ITSLeeds/scities](https://github.com/ITSLeeds/scities) and click 'Clone or download'. Download and unzip the .Zip file. Open the file `scities.Rproj` in the zipped file. The result is shown below (see the 'scities' project name in the top right-hand corner in Figure 1 above).
+
+To download **data** used in this session go to [github.com/ITSLeeds/scities](https://github.com/ITSLeeds/scities), click on '[Releases](https://github.com/ITSLeeds/scities/releases)' and and click on [**data_sci.zip**](https://github.com/ITSLeeds/scities/releases/download/0.1/data_sci.zip).
+
+Unzip the contents of the folder into the same working directory where you created a project.
+You should see the data, including `LSOA_BoundaryData` in the Files panel of RStudio as shown below.
 You should now be in an R session with access to all the data needed for this tutorial.
+
+**Note: RStudio projects are important because they set the working directory.**
 
 ## 2.4 Loading `.csv` format data 
 
-The base installation of R comes with core functions for reading `.txt`, `csv` and other tabular formats. To load data from local files you need to point R / RStudio to the directory that contains the local file. One way is to use the `setwd()` function as in the below
+The base installation of R comes with core functions for reading `.txt`, `csv` and other tabular formats.
 
-```{r, eval=FALSE}
-## Mac
-wd_old = setwd("data_sci/")
-```
+<!-- To load data from local files you need to point R / RStudio to the directory that contains the local file. One way is to use the `setwd()` function as in the below -->
 
-```{r, eval=FALSE}
-## Windows
-setwd("C:\\users\\...\\data_sci")
-```
+<!-- ```{r, eval=FALSE} -->
+<!-- ## Mac -->
+<!-- wd_old = setwd("scities/") -->
+<!-- ``` -->
+
+<!-- ```{r, eval=FALSE} -->
+<!-- ## Windows -->
+<!-- setwd("C:\\users\\...\\data_sci") -->
+<!-- ``` -->
 
 
-Another is to use the menu system
+<!-- Another is to use the menu system -->
 
-**Session > Set Working Directory ...** which give you options to chose from.
+<!-- **Session > Set Working Directory ...** which give you options to chose from. -->
 
-However you do it you should now set your working directory to the folder that contains the file `msoa_data_in.csv` and run the code below to load the data:
+<!-- However you do it you should now set your working directory to the folder that contains the file `msoa_data_in.csv` and run the code below to load the data: -->
 ```{r}
 # load the data
-ttw <- read.csv("msoa_data_in.csv")
+ttw = read.csv("msoa_data_in.csv")
 ```
 
 This loads a data table of 107 rows and 109 columns. These are data for the 107 MSOAs census areas in Leeds. These are *Medium Super Output Areas* containing around ~7,500 people in each. Here the data was obtained from https://www.nomisweb.co.uk/census/2011/WU03EW and describes proportions of people travelling to work by bike ***from*** each MSOA ***to*** each MSOA. Data with from-to information are known as "origin-destination" data or "flow" data.
@@ -360,11 +370,11 @@ This loads a data table of 107 rows and 109 columns. These are data for the 107 
 ## dimensions - rows and columns
 dim(ttw)
 ## column / variable names
-names(ttw)
-## look at the first 6 rows and 7 columns
-ttw[1:6,1:7]
-## use the sumamry function for the first 7 columns
-summary(ttw[,1:7])
+head(names(ttw))
+## look at the first 2 rows and 3 columns
+ttw[1:3, 1:2]
+## use the sumamry function for the second column
+summary(ttw[2])
 ```
 
 The default for `read.csv` is that the file has a header (i.e. the first row contains the names of the columns) and that the separator between values in any record is a comma. However these can be changed depending on the nature of the file you are seeking to load into R. A number of different types of files can be read into R.You should examine the help files for reading data in different formats. Enter `??read` to see some of these listed. You will note that `read.table` and `write.table` require more parameters to be specified than `read.csv` and `write.csv`. 
@@ -374,12 +384,12 @@ The default for `read.csv` is that the file has a header (i.e. the first row con
 The code below loads an ESRI format spatial data shapefile using the `st_read` function in the `sf` package, which you should have installed and loaded earlier. The `st_read` function can be used to load some spatial data: 
 ```{r}
 # load Spatial data  
-msoa <- st_read("MSOA_BoundaryData/england_msoa_ru_classn_2011.dbf")  
+msoa = read_sf("MSOA_BoundaryData/england_msoa_ru_classn_2011.dbf")  
 ```
 
 This data was obtained from the UK Census Data service. It simply contains outlines of the MSOA areas. The data attributes can be examined using the `as_tibble` function from the `tidyverse`:
 ```{r}
-head(as_tibble(msoa))
+head(as_tibble(msoa), 2)
 ```
 
 You can also examine the spatial properties of the data using the `plot` function associated with `sf` objects. This can be used to plot the outline of the data objects.
@@ -387,37 +397,6 @@ You can also examine the spatial properties of the data using the `plot` functio
 # outline
 plot(st_geometry(msoa))
 ```
-
-You can also load some raster data: The code below gives an example but I am not sure whether to keep this in! 
-
-```{r eval = F}
-setwd( "/Users/geoaco/Desktop/my_docs_mac/leeds_work/research/COSIT/paperanal/new_anal_v3/")
-new.proj <- CRS("+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.999601272 +x_0=400000 +y_0=-100000
-+ +ellps=airy +towgs84=375,-111,431,0,0,0,0 +units=m +no_defs")
-y  <- as(readGDAL("2011_all/2011_b1.rst"), "RasterLayer"); proj4string(y)  <- new.proj
-x1 <- as(readGDAL("2011_all/2011_b2.rst"), "RasterLayer"); proj4string(x1) <- new.proj
-x2 <- as(readGDAL("2011_all/2011_b3.rst"), "RasterLayer"); proj4string(x2) <- new.proj
-x3 <- as(readGDAL("2011_all/2011_b4.rst"), "RasterLayer"); proj4string(x3) <- new.proj
-r <- stack(y,x1,x2,x3)
-ex <- extent(604000, 619000, 290000, 305000)
-rc <- crop(r, ex) 
-names(rc) <- c("y", "x1", "x2","x3")
-save(rc, file = "rc.RData")
-```
-
-```{r echo = T, eval = F}
-load("rc.RData")
-png(filename = "rc.png", w = 8, h = 8, units = "in", res = 600)
-plotRGB(stack(rc), 3,2,1, stretch="lin")
-scalebar(5000, type = "bar", xy = c(613246.3, 290702.6), divs = 4, col = "white", below = "m")
-dev.off()
-df.rc <- data.frame(getValues(rc))
-```
-
-```{r, echo=F, cache = T, fig.width = 10}
-knitr::include_graphics("figures/rc.png")
-```
-
 
 ## 2.6 Loading R binary files
 
@@ -473,6 +452,7 @@ save.image(file = "myworkspace.RData")
 ```
 
 You can save specified elements using the `save` function recalling that either `.rda` or `.RData` extensions can be used:
+
 ```{r eval = F}
 # this will save everything in the workspace
 save(list = ls(), file = "MyData.rda")
@@ -513,7 +493,7 @@ ls()
 ## 4.1 Simple data explorations
 You have two R objects in your workspace: `ttw` `and `msoa`. The first thing is establish what types or classes they are:
 
-```{}
+```
 class(ttw)
 class(msoa)
 ```
@@ -524,25 +504,30 @@ First, examine the `ttw` data. This records the proportions of working people (c
 
 ```{r}
 dim(ttw)
-names(ttw)
-ttw[1:6, 1:10]
 ```
-There are 107 of these areas in Leeds. Notice how the code above just examined the first 10 columns of the `ttw` data and notice how low the data values are. This s confirmed when the `summary` function is used: 
-```{r}
-summary(ttw[, 3:10])
-# examine the Pop variable
-summary(ttw$Pop)
-```
+
+There are 107 of these areas in Leeds
+
+<!-- Notice how the code above just examined the first 10 columns of the `ttw` data and notice how low the data values are. This is confirmed when the `summary` function is used:  -->
+
+<!-- ```{r, eval=FALSE, echo=FALSE} -->
+<!-- # commented-out -->
+<!-- summary(ttw[, 3:]) -->
+<!-- # examine the Pop variable -->
+<!-- summary(ttw$Pop) -->
+<!-- ``` -->
  
 We can see the total proportions of the commuting population that is cycling to work living in each LSOA using the code below.
 
 ```{r}
 round(apply(ttw[, 3:109], 1, sum), 2)
+colSums(ttw[3:9])
 ```
 
 The numbers are low - typically around 0.02. We could make the numbers a bit easier to interpret by normalising these proportions so that they describe the numbers of commuters by bike per 1000 commuters
+
 ```{r}
-ttw[, 3:109] <- ttw[,2] * ttw[, -c(1,2)]
+ttw[, 3:109] = ttw[,2] * ttw[, -c(1,2)]
 ttw[1:6, 1:10]
 ```
 And then when we look at the numbers cycling from each LSOA origin again 
@@ -567,7 +552,9 @@ There are some MSOAs that have very high numbers of people cycling to them. Why 
 ****
 
 ## 4.2 Visual data expolorations 
+
 The `hist` function can be used visually sumamrise distributions of values across the MSOAS. Try running the code below;
+
 ```{r}
 hist(ttw$Pop, breaks = 10,
   xlab = "Population", main = "Populations across MSOAs in Leeds", col = "red")
@@ -646,7 +633,7 @@ head(msoa$code)
 ```
 These can be used to link or join the data together. 
 ```{r}
-temp <- full_join(msoa, ttw, by = c("code" = "From_MSOA"))
+temp = full_join(msoa, ttw, by = c("code" = "From_MSOA"))
 class(temp)
 names(temp)
 head(as_tibble(temp[, 1:6]))
@@ -710,19 +697,19 @@ It is interesting to examine the Origin and Destinations locations from which an
 This could be a bit convoluted using the temp object as would need to create a copy of temp without geometry and check that the order of the columns (destinations) matches the order of the rows (origins) in `ttw` and `temp`, etc etc. Probably the easiest way is to create the variables in `ttw` and then redo the join above to recreate `temp`. However we still need to check that order of the Origins (rows) matches that of the Destinations (columns) in `ttw`. The code below aligns these using the `match` function.
 
 ```{r}
-index <- match(names(ttw)[3:109], ttw$From_MSOA)
+index = match(names(ttw)[3:109], ttw$From_MSOA)
 # examine index
 index
 # then use it to reorder the rows 
 # ie the second element in the match call
-ttw <- ttw[index,]
+ttw = ttw[index,]
 ```
 
 Then, now we are confident that the row and column ordering are the same for the MSOAs, we can calculate the origin and destination totals
 
 ```{r}
-ttw$OriginSum <- round(rowSums(ttw[3:109]),0)
-ttw$DestSum <- round(colSums(ttw[3:109]),0)
+ttw$OriginSum = round(rowSums(ttw[3:109]),0)
+ttw$DestSum = round(colSums(ttw[3:109]),0)
 ```
 
 If you examine these then it is evident that the origin values are more evenly distributed than the destination values:
@@ -733,7 +720,7 @@ ttw$DestSum
 
 Now `temp` can be recreated and this time will include these new attributes:
 ```{r}
-temp <- full_join(msoa, ttw, by = c("code" = "From_MSOA"))
+temp = full_join(msoa, ttw, by = c("code" = "From_MSOA"))
 ```  
 
 and the origins and destination values of people commuting by bike can be mapped.
@@ -752,21 +739,21 @@ In terms of mapping these flows, this can be done using the code below, adapted 
 
 ```{r}
 # melt the data
-input <- melt(ttw[,-c(2, 110, 111)], id.vars = "From_MSOA")
-names(input)<- c("origin", "destination","total")
+input = melt(ttw[,-c(2, 110, 111)], id.vars = "From_MSOA")
+names(input)= c("origin", "destination","total")
 # create centroids with a Code reference
-centroids <- data.frame(st_coordinates(st_centroid(msoa)), Code = msoa$code)
+centroids = data.frame(st_coordinates(st_centroid(msoa)), Code = msoa$code)
 # merge to get the xy coordinates joined to the origins
-or.xy<- merge(input, centroids, by.x="origin", by.y="Code")
-names(or.xy)<- c("origin", "destination", "trips", "oX", "oY")
+or.xy= merge(input, centroids, by.x="origin", by.y="Code")
+names(or.xy)= c("origin", "destination", "trips", "oX", "oY")
 # merge to get the xy coordinates joined to the destinations
-dest.xy<-  merge(or.xy, centroids, by.x="destination", by.y="Code")
-names(dest.xy)<- c("origin", "destination", "trips", "oX", "oY", "dX", "dY")
+dest.xy=  merge(or.xy, centroids, by.x="destination", by.y="Code")
+names(dest.xy)= c("origin", "destination", "trips", "oX", "oY", "dX", "dY")
 ```
 
 This having been done the flows greater than 3, can be plotted using `ggplot`. First some parameters need to be set:
 ```{r}
-xquiet<- scale_x_continuous("", breaks=NULL)
+xquiet= scale_x_continuous("", breaks=NULL)
 yquiet<-scale_y_continuous("", breaks=NULL)
 quiet<-list(xquiet, yquiet)
 ```
@@ -788,7 +775,7 @@ ggplot(dest.xy[which(dest.xy$trips>3),])+
 Some context can be applied by modifying the plot commands above:
 ```{r cache1, cache = T, message=F, warning=F, cache = F, results='hide'}
 # prepare an outline of the study area 
-pols <- SpatialPolygonsDataFrame(gUnaryUnion(as(msoa, "Spatial")), data = data.frame(1))
+pols = SpatialPolygonsDataFrame(gUnaryUnion(as(msoa, "Spatial")), data = data.frame(1))
 pols@data$id = rownames(pols@data)
 pols.points = fortify(pols, region="id")
 pols.df = left_join(pols.points, pols@data, by="id")
@@ -865,7 +852,7 @@ We need to find out what the `key` is first.
 Searching for "cycleway osm" pretty quickly leeds to the site [wiki.openstreetmap.org](https://wiki.openstreetmap.org/wiki/Key:cycleway), which explains how cycleways are tagged in OSM.
 
 ```{r eval=FALSE}
-osm_sf <- opq("Leeds, UK") %>%
+osm_sf = opq("Leeds, UK") %>%
             add_osm_feature(key = "cycleway") %>%
             osmdata_sf()
 saveRDS(osm_sf, "osm_sf.Rds")
@@ -894,7 +881,7 @@ plot(st_geometry(osm_sf$osm_lines))
 It would be nice to see this in the context of the MSOAs but the `hampi_sf$osm_lines` data will need to be converted to the same spatial reference as the MSOAs: from WGS84 (latitude and longitude) in decimal degrees to Ordnance Survey's British National Grid in metres:
 
 ```{r}
-osm_sf$osm_lines <- st_transform(osm_sf$osm_lines, crs = 27700)
+osm_sf$osm_lines = st_transform(osm_sf$osm_lines, crs = 27700)
 tm_shape(osm_sf$osm_lines)+
   tm_lines(lwd = 2, col = "red")+
   tm_shape(msoa)+
@@ -914,20 +901,20 @@ There are many ways we could / should determine new cycle routes but perhaps the
 ```{r}
 head(dest.xy)
 # function to calulate distace in km between MSOAs
-calc.dist <- function(x){
+calc.dist = function(x){
   return( sqrt( (x[3]-x[1])^2 + (x[4]-x[3])^2 ) /1000)
 }
 # create a new variable in dest.xy
-dest.xy$dist <- apply(dest.xy[,4:7], 1,calc.dist )
+dest.xy$dist = apply(dest.xy[,4:7], 1,calc.dist )
 ```
 
 Then we can use this to generate a distribution of distances cycled to work
 ```{r}
-trip.counts <- round(dest.xy$trips, 0)
-dist.vec <- vector()
+trip.counts = round(dest.xy$trips, 0)
+dist.vec = vector()
 for( i in 1: length(trip.counts)) {
-  dist.i <- rep(dest.xy$dist[i], trip.counts[i])
-  dist.vec <- append(dist.vec, dist.i)
+  dist.i = rep(dest.xy$dist[i], trip.counts[i])
+  dist.vec = append(dist.vec, dist.i)
 }
 ```
 
@@ -955,9 +942,9 @@ So most people travel between 3.8 and8.1 km during their cycling commute and we 
 First we need to make an index to align and reorder `ttw` to make sure the data rows are aligned.
 
 ```{r}
-index <- match(msoa$code, ttw$From_MSOA)
+index = match(msoa$code, ttw$From_MSOA)
 index 
-ttw <- ttw[index, ]
+ttw = ttw[index, ]
 ```
 
 Then we can map the MSOAs that are the largest destinations to confirm they are contiguous and then combine these and create buffers reflecting these distances. Here we have to work in projected:
@@ -969,7 +956,7 @@ tm_shape(msoa)+
   tm_shape(msoa[ttw$DestSum > 150,])+
   tm_polygons()
 # combine
-city <- st_union(msoa[ttw$DestSum > 150,])
+city = st_union(msoa[ttw$DestSum > 150,])
 city_buf_inner <-st_buffer(city, 3800) 
 city_buf_outer <-st_buffer(city, 8100) 
 ```
