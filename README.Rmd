@@ -35,8 +35,14 @@ file.rename("data_sci")
 dir.create("figures")
 files_to_move = list.files("data_sci", pattern = "png", full.names = TRUE)
 new_locations = gsub(pattern = "data_sci/", replacement = "figures/", files_to_move)
-
 file.rename(files_to_move, new_locations)
+
+# create pdf
+webshot::webshot(url = "file:///tmp/Rtmpd4g6CE/preview-1002421bad69.html", file = "/tmp/scities-digi-methods.pdf")
+browseURL("/tmp/scities-digi-methods.pdf") # too long!
+pagedown::chrome_print(url = "file:///tmp/Rtmpd4g6CE/preview-1002421bad69.html", output = "scities-digi-methods.pdf")
+browseURL("scities-digi-methods.pdf") # looks good
+piggyback::pb_upload("scities-digi-methods.pdf")
 ```
 
 

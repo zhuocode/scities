@@ -19,7 +19,7 @@ or (worse) `README.docx`? Because you can include R chunks like this:
 d = Sys.Date()
 msg = "Welcome to the digital methods workshop on "
 print(paste0(msg, d))
-#> [1] "Welcome to the digital methods workshop on 2018-11-23"
+#> [1] "Welcome to the digital methods workshop on 2018-11-26"
 ```
 
 The date automatically changes each time we build (‘compile’) the
