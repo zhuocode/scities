@@ -12,7 +12,8 @@ output:
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  message = FALSE
 )
 ```
 
@@ -22,20 +23,43 @@ usethis::use_readme_rmd()
 # to release stuff do: 
 piggyback::pb_new_release(tag = "0.1")
 piggyback::pb_upload("Preparatory Homework for Data session.pdf")
-piggyback::pb_upload("data_sci.zip")
-unzip("data_sci.zip", exdir = "data_sci")
-file.edit("data_sci/session_v2.Rmd")
-files_to_move = list.files("data_sci", pattern = "rda|RData|msoa|bikes|MSOA|LSOA|example|All", full.names = TRUE)
-new_locations = gsub(pattern = "data_sci/", replacement = "", files_to_move)
 
-file.rename(files_to_move, new_locations)
-file.rename("data_sci")
+od_attributes = od_attributes[-1]
 
-# move images
-dir.create("figures")
-files_to_move = list.files("data_sci", pattern = "png", full.names = TRUE)
-new_locations = gsub(pattern = "data_sci/", replacement = "figures/", files_to_move)
-file.rename(files_to_move, new_locations)
+# Download input data for leeds
+download.file("https://github.com/npct/pct-outputs-regional-notR/raw/master/commute/msoa/west-yorkshire/z_attributes.csv", "z_attributes.csv")
+download.file("https://github.com/npct/pct-outputs-regional-notR/raw/master/commute/msoa/west-yorkshire/z.geojson", "z.geojson")
+download.file("https://github.com/npct/pct-outputs-regional-notR/raw/master/commute/msoa/west-yorkshire/od_attributes.csv", "od_attributes.csv")
+download.file("https://github.com/npct/pct-outputs-regional-notR/raw/master/commute/msoa/west-yorkshire/rf.geojson", "rf.geojson")
+download.file("https://github.com/npct/pct-outputs-regional-R/raw/master/commute/msoa/west-yorkshire/l.Rds", "l.Rds")
+
+
+zones_sf = dplyr::select(zones_sf, geo_code, population = all)
+plot(zones_sf)
+write_sf(zones_sf, "zones_sf.geojson")
+
+piggyback::pb_upload("l.Rds")
+piggyback::pb_upload("z.geojson")
+piggyback::pb_upload("zones_sf.geojson")
+piggyback::pb_upload("z_attributes.csv")
+piggyback::pb_upload("od_attributes.csv")
+rf = sf::read_sf("rf.geojson")
+library(tidyverse)
+rf100 = rf %>% 
+  top_n(n = 100, wt = all)
+sf::write_sf(rf100, "rf100.geojson")
+piggyback::pb_upload("rf100.geojson")
+
+# files_to_move = list.files("data_sci", pattern = "rda|RData|msoa|bikes|MSOA|LSOA|example|All", full.names = TRUE)
+# new_locations = gsub(pattern = "data_sci/", replacement = "", files_to_move)
+# file.rename(files_to_move, new_locations)
+# file.rename("data_sci")
+
+# # move images
+# dir.create("figures")
+# files_to_move = list.files("data_sci", pattern = "png", full.names = TRUE)
+# new_locations = gsub(pattern = "data_sci/", replacement = "figures/", files_to_move)
+# file.rename(files_to_move, new_locations)
 
 # create pdf
 webshot::webshot(url = "file:///tmp/Rtmpd4g6CE/preview-1002421bad69.html", file = "/tmp/scities-digi-methods.pdf")
@@ -136,9 +160,8 @@ After you have installed R and RStudio, you are ready to go.
 You should see something like this:
 
 ```{r, echo=FALSE, fig.cap="RStudio in action"}
-knitr::include_graphics("figures/rstudio-spatial.png")
+knitr::include_graphics("figures/rstudio-scities.png")
 ```
-
 
 If you have worded your way through the Owen Guide (https://cran.r-project.org/doc/contrib/Owen-TheRGuide.pdf up to page 38) then you will have come across a few things that will be re-capped here: 
 
@@ -308,15 +331,24 @@ There are a number of ways of loading data into you R session:
 1. read a file from somewhere in the internet (proprietary or R binary format) - we may do some of that.
 
 Unofficial datasets, such as those provided by the OpenStreetMap project are messier but in some cases richer.
-An exmaple is provided below, which downloads and plots parks in Leeds:
-
+An exmaple is provided below, which downloads and plots parks in Leeds (you can also download the data from `parks.Rds`):
 
 ```{r osm}
 library(osmdata)
 q = opq(bbox = 'leeds, uk') %>% 
   add_osm_feature(key = "leisure", value = "park")
+```
+
+```{r, eval=FALSE}
 res_parks = osmdata_sf(q = q)
 parks = res_parks$osm_polygons
+plot(parks$geometry)
+```
+
+```{r, echo=FALSE}
+# saveRDS(parks, "parks.Rds")
+piggyback::pb_upload("parks.Rds")
+parks = readRDS("parks.Rds")
 plot(parks$geometry)
 ```
 
@@ -331,7 +363,7 @@ You can do this in 2 ways:
 To download **data** used in this session go to [github.com/ITSLeeds/scities](https://github.com/ITSLeeds/scities), click on '[Releases](https://github.com/ITSLeeds/scities/releases)' and and click on [**data_sci.zip**](https://github.com/ITSLeeds/scities/releases/download/0.1/data_sci.zip).
 
 Unzip the contents of the folder into the same working directory where you created a project.
-You should see the data, including `LSOA_BoundaryData` in the Files panel of RStudio as shown below.
+You should see the data, including `.z_attributes.csv` in the Files panel of RStudio as shown below.
 You should now be in an R session with access to all the data needed for this tutorial.
 
 **Note: RStudio projects are important because they set the working directory.**
@@ -358,9 +390,9 @@ The base installation of R comes with core functions for reading `.txt`, `csv` a
 <!-- **Session > Set Working Directory ...** which give you options to chose from. -->
 
 <!-- However you do it you should now set your working directory to the folder that contains the file `msoa_data_in.csv` and run the code below to load the data: -->
-```{r}
+```{r, message=FALSE}
 # load the data
-ttw = read.csv("msoa_data_in.csv")
+zones = read_csv("z_attributes.csv")
 ```
 
 This loads a data table of 107 rows and 109 columns. These are data for the 107 MSOAs census areas in Leeds. These are *Medium Super Output Areas* containing around ~7,500 people in each. Here the data was obtained from https://www.nomisweb.co.uk/census/2011/WU03EW and describes proportions of people travelling to work by bike ***from*** each MSOA ***to*** each MSOA. Data with from-to information are known as "origin-destination" data or "flow" data.
@@ -368,13 +400,13 @@ This loads a data table of 107 rows and 109 columns. These are data for the 107 
 . You can inspect the data in a few ways. 
 ```{r}
 ## dimensions - rows and columns
-dim(ttw)
+dim(zones)
 ## column / variable names
-head(names(ttw))
+head(names(zones))
 ## look at the first 2 rows and 3 columns
-ttw[1:3, 1:2]
+zones[1:3, 1:2]
 ## use the sumamry function for the second column
-summary(ttw[2])
+summary(zones[2])
 ```
 
 The default for `read.csv` is that the file has a header (i.e. the first row contains the names of the columns) and that the separator between values in any record is a comma. However these can be changed depending on the nature of the file you are seeking to load into R. A number of different types of files can be read into R.You should examine the help files for reading data in different formats. Enter `??read` to see some of these listed. You will note that `read.table` and `write.table` require more parameters to be specified than `read.csv` and `write.csv`. 
@@ -382,32 +414,34 @@ The default for `read.csv` is that the file has a header (i.e. the first row con
 ## 2.5 Loading spatial data including Shapefiles and Rasters
 
 The code below loads an ESRI format spatial data shapefile using the `st_read` function in the `sf` package, which you should have installed and loaded earlier. The `st_read` function can be used to load some spatial data: 
+
 ```{r}
 # load Spatial data  
-msoa = read_sf("MSOA_BoundaryData/england_msoa_ru_classn_2011.dbf")  
+zones_sf = read_sf("zones_sf.geojson")  
 ```
 
 This data was obtained from the UK Census Data service. It simply contains outlines of the MSOA areas. The data attributes can be examined using the `as_tibble` function from the `tidyverse`:
 ```{r}
-head(as_tibble(msoa), 2)
+head(as_tibble(zones_sf), 2)
 ```
 
 You can also examine the spatial properties of the data using the `plot` function associated with `sf` objects. This can be used to plot the outline of the data objects.
 ```{r}
 # outline
-plot(st_geometry(msoa))
+plot(st_geometry(zones_sf))
 ```
 
 ## 2.6 Loading R binary files
 
-You can also load R binary files. These have the advantage of being very efficient at storing data and quicker to load than for example, `.csv` files. By convention they have a `.rda` or `.RData` extension: 
+You can also load R binary files. These have the advantage of being very efficient at storing data and quicker to load than for example, `.csv` files. By convention they have a `.rds` extension: 
 
 ```{r eval = F}
-load("ttw.rda")
+saveRDS(zones, "zones.Rds")
+zones = readRDS("zones.Rds")
 ## use ls to see what is loaded
 ls()
 ```
-You should see that a variable called `bike_travel` has been loaded. It is the same as the data read into `ttw`. You can explore the `bike_travel` R object if you want to using the functions above that were applied to `ttw`.  
+You should see that a variable called `bike_travel` has been loaded. It is the same as the data read into `zones`. You can explore the `bike_travel` R object if you want to using the functions above that were applied to `zones`.  
 
 ## 2.7 Other data formats 
 
@@ -421,20 +455,29 @@ The `foreign` package can be used to load many file types (e.g. EXCEL and SPSS) 
 
 Data can be written into a Comma Separated Variable file using the command `write.csv` and then read back into a different variable, as follows: 
 ```{r eval=F}
-write.csv(ttw, file = "ttw.csv")
+write_csv(zones, file = "zones.csv")
 ```
 
-This writes a `.csv` file into the current working directory. If you open it using a text editor or a spreadsheet software, you will see  that it has the expected column plus the index for each record. This is because the default for `write.csv` includes the `row.names = TRUE` parameter. Again examine the help file for this function.
-```{r eval = F}
-write.csv(ttw, file = "test.csv", row.names = F)
+This writes a `.csv` file into the current working directory.
+
+<!-- If you open it using a text editor or a spreadsheet software, you will see  that it has the expected column plus the index for each record. This is because the default for `write.csv` includes the `row.names = TRUE` parameter. Again examine the help file for this function. -->
+<!-- ```{r eval = F} -->
+<!-- write.csv(ttw, file = "test.csv", row.names = F) -->
+<!-- ``` -->
+
+## 3.2 Spatial data including geojson
+
+Read spatial data with `read_sf()` (make sure you have downloaded the data from [github.com/ITSLeeds/scities/releases](https://github.com/ITSLeeds/scities/releases)):
+
+```{r}
+zones_sf = read_sf("z.geojson")
 ```
 
-## 3.2 Spatial data including Shapefiles
 
 In a similar way the `st_write` function can used to write data out into a number of formats 
 
 ```{r eval = F}
-st_write(msoa, "msoa.shp" )
+st_write(zones_sf, "msoa.shp" )
 ```
 
 ## 3.3 R Data files
@@ -456,15 +499,15 @@ You can save specified elements using the `save` function recalling that either 
 ```{r eval = F}
 # this will save everything in the workspace
 save(list = ls(), file = "MyData.rda")
-# this will save just ttw
-save(list = "ttw", file = "MyData.RData")
-# this will save ttw and msoa
-save(list = c("ttw", "msoa"), file = "AllData.rda")
+# this will save just zones
+save(list = "zones", file = "MyData.RData")
+# this will save zones and zones_sf
+save(list = c("zones", "zones_sf"), file = "AllData.rda")
 ```
 
 ```{r echo = F}
 
-save(list = c("ttw", "msoa"), file = "AllData.rda")
+save(list = c("zones", "zones_sf"), file = "AllData.rda")
 ```
 Make sure you run the last line of code as you will use the results in the next section.
 
@@ -491,78 +534,77 @@ ls()
 ```
 
 ## 4.1 Simple data explorations
-You have two R objects in your workspace: `ttw` `and `msoa`. The first thing is establish what types or classes they are:
+You have two R objects in your workspace: `zones` and `zones_sf`. The first thing is establish what types or classes they are:
 
 ```
-class(ttw)
-class(msoa)
+class(zones)
+class(zones_sf)
 ```
 
-Here we can see that both objects are of the class `data.frame`. This is a data table a but like a spreadsheet in Excel. The `msoa` object is also of class `sf` indicating its spatial nature.
+Here we can see that both objects are of the class `data.frame`. This is a data table a but like a spreadsheet in Excel. The `zones_sf` object is also of class `sf` indicating its spatial nature.
 
-First, examine the `ttw` data. This records the proportions of working people (commuters) cycling to work in each MSOA area to each other MSOA area in Leeds (the data is *WU03EW - Location of usual residence and place of work by method of travel to work (MSOA level* and has been downloaded from here: https://www.nomisweb.co.uk/census/2011/WU03EW and manipulated a bit for use in this workshop). The MSOA codes in the `ttw` data contains the **origin** (rows) and **desination** (columns) MSOAs. The `dim`, `head` and `names` functions show that the data has 107 rows, 109 columns, the names are a series of census codes: 
+First, examine the `zones` data. This records the proportions of working people (commuters) cycling to work in each MSOA area to each other MSOA area in Leeds (the data is *WU03EW - Location of usual residence and place of work by method of travel to work (MSOA level* and has been downloaded from here: https://www.nomisweb.co.uk/census/2011/WU03EW and manipulated a bit for use in this workshop). The MSOA codes in the `zones` data contains the **origin** (rows) and **desination** (columns) MSOAs. The `dim`, `head` and `names` functions show that the data has 107 rows, 109 columns, the names are a series of census codes: 
 
 ```{r}
-dim(ttw)
+dim(zones)
 ```
 
 There are 107 of these areas in Leeds
 
-<!-- Notice how the code above just examined the first 10 columns of the `ttw` data and notice how low the data values are. This is confirmed when the `summary` function is used:  -->
+<!-- Notice how the code above just examined the first 10 columns of the `zones` data and notice how low the data values are. This is confirmed when the `summary` function is used:  -->
 
 <!-- ```{r, eval=FALSE, echo=FALSE} -->
 <!-- # commented-out -->
-<!-- summary(ttw[, 3:]) -->
+<!-- summary(zones[, 3:]) -->
 <!-- # examine the Pop variable -->
-<!-- summary(ttw$Pop) -->
+<!-- summary(zones$Pop) -->
 <!-- ``` -->
  
 We can see the total proportions of the commuting population that is cycling to work living in each LSOA using the code below.
 
 ```{r}
-round(apply(ttw[, 3:109], 1, sum), 2)
-colSums(ttw[3:9])
+head(zones$bicycle / zones$all) 
 ```
 
 The numbers are low - typically around 0.02. We could make the numbers a bit easier to interpret by normalising these proportions so that they describe the numbers of commuters by bike per 1000 commuters
 
 ```{r}
-ttw[, 3:109] = ttw[,2] * ttw[, -c(1,2)]
-ttw[1:6, 1:10]
-```
-And then when we look at the numbers cycling from each LSOA origin again 
-```{r}
-round(apply(ttw[, 3:109], 1, sum), 2)
+zones$percent = zones$bicycle / zones$all * 100
 ```
 
-There are obviously some areas that which have more cycling commuters (let's call them *CCs*) than others.  
+<!-- And then when we look at the numbers cycling from each LSOA origin again  -->
+<!-- ```{r} -->
+<!-- round(apply(zones[, 3:109], 1, sum), 2) -->
+<!-- ``` -->
 
-****
-**NB** the line of code above although complex, can be unpicked: 
-- `apply` is a function that applies another function to a data table either over each row in the data table or each column. The direction the function is applied is indicated by the second argument in the call to the function, in this case `1` for each row (`2` would indicate each column)
-- the function is `sum` which sums all the values in each row 
-- the data table, `ttw[, 3:109]` is all rows and columns 3 to 109
-- `round` is another function that allows you to control the number of decimal places, in this case 2 (although none were shown: try running `apply(ttw[, 3:109], 1, sum` to see what happens when you don't use it)
+<!-- There are obviously some areas that which have more cycling commuters (let's call them *CCs*) than others.   -->
 
-So just by change the `1` to `2` the same code can be used to see how many people travel *to* each MSOA ie each destination (The `as.vector` gets rid of the names in the result): 
-```{r}
-as.vector(round(apply(ttw[, 3:109], 2, sum), 2))
-```
-There are some MSOAs that have very high numbers of people cycling to them. Why do you think this is? 
-****
+<!-- **** -->
+<!-- **NB** the line of code above although complex, can be unpicked:  -->
+<!-- - `apply` is a function that applies another function to a data table either over each row in the data table or each column. The direction the function is applied is indicated by the second argument in the call to the function, in this case `1` for each row (`2` would indicate each column) -->
+<!-- - the function is `sum` which sums all the values in each row  -->
+<!-- - the data table, `zones[, 3:109]` is all rows and columns 3 to 109 -->
+<!-- - `round` is another function that allows you to control the number of decimal places, in this case 2 (although none were shown: try running `apply(zones[, 3:109], 1, sum` to see what happens when you don't use it) -->
+
+<!-- So just by change the `1` to `2` the same code can be used to see how many people travel *to* each MSOA ie each destination (The `as.vector` gets rid of the names in the result):  -->
+<!-- ```{r} -->
+<!-- as.vector(round(apply(zones[, 3:109], 2, sum), 2)) -->
+<!-- ``` -->
+<!-- There are some MSOAs that have very high numbers of people cycling to them. Why do you think this is?  -->
+<!-- **** -->
 
 ## 4.2 Visual data expolorations 
 
 The `hist` function can be used visually sumamrise distributions of values across the MSOAS. Try running the code below;
 
 ```{r}
-hist(ttw$Pop, breaks = 10,
+hist(zones$all, breaks = 10,
   xlab = "Population", main = "Populations across MSOAs in Leeds", col = "red")
 ```
 
 Alternatively`ggplot2` package that is loaded with the `tidyverse` van also be used: 
 ```{r eval = T}
-ggplot(ttw, aes(x=Pop)) + 
+ggplot(zones, aes(x = all)) + 
     geom_histogram(binwidth=180,colour="white", fill = "red") +
     xlab("Population")+
     labs(title="Populations across MSOAs in Leeds")
@@ -570,7 +612,7 @@ ggplot(ttw, aes(x=Pop)) +
 
 This is more involved than simple `hist` but the basic idea is that `ggplot` is called and then the type of plot is specified. It allows layers of plot instructions to be compiled. It can also be used to create density plots: 
 ```{r eval = T}
-ggplot(ttw, aes(x=Pop)) + 
+ggplot(zones, aes(x= all)) + 
     geom_histogram(aes(y=..density..),
                    binwidth=180,colour="white") +
     geom_density(alpha=.2, fill="#FF6666") +
@@ -581,18 +623,18 @@ ggplot(ttw, aes(x=Pop)) +
 
 The `boxplot()` function also provides a useful way of summarising data:
 ```{r eval = T}
-boxplot(ttw$Pop, main = "The distribution MSOA populations in Leeds")
+boxplot(zones$all, main = "The distribution MSOA populations in Leeds")
 ```
 
 And there is `ggplot` version as well but this is not so good for single values and better when comparing distributions of some value across categorical variables (as is done later in this section)
 ```{r eval = T}
-ggplot(ttw, aes(x=1, y = Pop)) + 
+ggplot(zones, aes(x=1, y = all)) + 
     geom_boxplot() 
 ```
 
-We can also examine the `msoa` object in the same way. The `as_tibble` function converts the `data.frame` of `msoa` to a `tibble format. We do not have time to cover this here but these are another data table similar to `data.frame` but a bit smarter 
+We can also examine the `zones_sf` object in the same way. The `as_tibble` function converts the `data.frame` of `zones_sf` to a `tibble format. We do not have time to cover this here but these are another data table similar to `data.frame` but a bit smarter 
 ```{r eval = T}
-summary(as_tibble(msoa))
+summary(as_tibble(zones_sf[1:3]))
 ```
 
 This shows that we have some categorical variables (actual a Rural and Urban classification) and some codes relating to MSOA labeling.
@@ -601,13 +643,13 @@ As this is spatial data some of these attributes can be mapped:
 Or the attributes held by each object in the spatial dataset (in this case 107 MSOA census areas in Leeds:
 ```{r}
 # plot by attrubute
-plot(msoa["ruc11cd"])
+plot(zones_sf["foot"])
 ```
 
 The `tmap` package allows more sophisticated maps (as `ggplot2` does for other graphics): 
 ```{r}
-tm_shape(msoa) +
-  tm_polygons("ruc11cd")
+tm_shape(zones_sf) +
+  tm_polygons("foot")
 ```
 
 However, `tmap` also allows interactive graphics for example with an OpenStreetMap backdrop, Notice the use of transparency parameter specified through `aslpha` and a particular OSM backdrop in the code below: 
@@ -615,8 +657,8 @@ However, `tmap` also allows interactive graphics for example with an OpenStreetM
 # set the mode to view for OSM
 tmap_mode('view')
 # call the basic map but with 
-tm_shape(msoa) +
-  tm_polygons("ruc11cd", alph = 0.4) +
+tm_shape(zones_sf) +
+  tm_polygons("foot", alph = 0.4) +
   tm_view(basemaps = "OpenStreetMap")
 # reset the plot mode
 tmap_mode('plot')
@@ -626,23 +668,26 @@ You should be able to zoom in and explore *where* these different classes of urb
 
 ## 4.3 Combining / Joining data
 
-You may have noticed that `ttw` and `msoa` have an attribute in common:
+You may have noticed that `zones` and `zones_sf` have an attribute in common:
 ```{r}
-head(ttw$From_LSOA)
-head(msoa$code)
+head(zones$geo_code)
+head(zones_sf$geo_code)
 ```
+
 These can be used to link or join the data together. 
+
 ```{r}
-temp = full_join(msoa, ttw, by = c("code" = "From_MSOA"))
-class(temp)
-names(temp)
-head(as_tibble(temp[, 1:6]))
+zones_joined = left_join(zones_sf, zones)
+class(zones_joined)
+names(zones_joined)[1:9]
+head(as_tibble(zones_joined[, 1:6]))
 ```
-Notice how the attributes from `ttw` have been joined to those of `msoa` in `temp` which is also a `sf` object. It can be mapped as before, again with a transparency term:
+
+Notice how the attributes from `zones` have been joined to those of `msoa` in `zones_joined` which is also a `sf` object. It can be mapped as before, again with a transparency term:
 ```{r}
 tmap_mode('view')
-tm_shape(temp) +
-  tm_polygons("Pop", alph = 0.4) +
+tm_shape(zones_joined) +
+  tm_polygons("all", alph = 0.4) +
   tm_view(basemaps = "OpenStreetMap")
 # reset the plot mode
 tmap_mode('plot')
@@ -650,7 +695,7 @@ tmap_mode('plot')
 And a boxplot of the population distributions for different types of MSOA can be shown together:  
 ```{r}
 # Boxplot
-ggplot(temp, aes(ruc11, Pop)) +
+ggplot(zones_joined, aes(lad_name, all)) +
   geom_boxplot()+
   xlab("Rural / Urban Class")+
   ylab("Population")+
@@ -684,50 +729,18 @@ Next we will develop some analysis of flows.
 
 ## 6.1 Origins and Destinations
 
-In the second part of the practical we will look at commuting flows between MSOAs by bike and identify opportunities for extending the cycle network in Leeds 
+In the second part of the practical we will look at commuting flows between MSOAs by bike and identify opportunities for extending the cycle network in Leeds .
 
-Recall that the `temp` variable combines the spatial data and the cycling data. The rows are are each origin and the LSOA coded columns are the destinations with other variables:
+We will load the origin-destination data from `od_attributes.csv`:
 
 ```{r}
-as_tibble(temp[1:4])
+od_attributes = read_csv("od_attributes.csv")
 ```
 
-It is interesting to examine the Origin and Destinations locations from which and to which cyclists are commuting. To this, we can create 2 variables based on the sum of all cyclists leaving from all origin locations and the sum of all cyclists arriving at ALL destination locations. 
-
-This could be a bit convoluted using the temp object as would need to create a copy of temp without geometry and check that the order of the columns (destinations) matches the order of the rows (origins) in `ttw` and `temp`, etc etc. Probably the easiest way is to create the variables in `ttw` and then redo the join above to recreate `temp`. However we still need to check that order of the Origins (rows) matches that of the Destinations (columns) in `ttw`. The code below aligns these using the `match` function.
 
 ```{r}
-index = match(names(ttw)[3:109], ttw$From_MSOA)
-# examine index
-index
-# then use it to reorder the rows 
-# ie the second element in the match call
-ttw = ttw[index,]
-```
-
-Then, now we are confident that the row and column ordering are the same for the MSOAs, we can calculate the origin and destination totals
-
-```{r}
-ttw$OriginSum = round(rowSums(ttw[3:109]),0)
-ttw$DestSum = round(colSums(ttw[3:109]),0)
-```
-
-If you examine these then it is evident that the origin values are more evenly distributed than the destination values:
-```{r}
-ttw$OriginSum
-ttw$DestSum
-```
-
-Now `temp` can be recreated and this time will include these new attributes:
-```{r}
-temp = full_join(msoa, ttw, by = c("code" = "From_MSOA"))
-```  
-
-and the origins and destination values of people commuting by bike can be mapped.
-
-```{r}
-tm_shape(temp) +
-  tm_polygons(c("OriginSum", "DestSum")) +
+tm_shape(zones_joined) +
+  tm_polygons(c("bicycle", "car_driver")) +
   tm_layout(legend.position = c("left","bottom"))
 ```  
 
@@ -735,78 +748,85 @@ Here we can see that there are very distinct and perhaps expected patterns with 
 
 ## 6.2 Mapping Flows
 
-In terms of mapping these flows, this can be done using the code below, adapted from http://spatial.ly/2015/03/mapping-flows/. The code *melts* the `ttw` data to 3 columns, links that to MSOA polygon geometric centroids (these are points that represent the centre of  each MSOA area) and then merges these together 
+In terms of mapping flows, an origin-destination matrix can be converted into 'long' format using code adapted from http://spatial.ly/2015/03/mapping-flows/.
+
+<!-- The code *melts* the `ttw` data to 3 columns, links that to MSOA polygon geometric centroids (these are points that represent the centre of  each MSOA area) and then merges these together  -->
+
+<!-- ```{r} -->
+<!-- # melt the data -->
+<!-- input = melt(zones[,-c(2, 110, 111)], id.vars = "From_MSOA") -->
+<!-- names(input)= c("origin", "destination","total") -->
+<!-- # create centroids with a Code reference -->
+<!-- centroids = data.frame(st_coordinates(st_centroid(msoa)), Code = msoa$code) -->
+<!-- # merge to get the xy coordinates joined to the origins -->
+<!-- or.xy= merge(input, centroids, by.x="origin", by.y="Code") -->
+<!-- names(or.xy)= c("origin", "destination", "trips", "oX", "oY") -->
+<!-- # merge to get the xy coordinates joined to the destinations -->
+<!-- dest.xy=  merge(or.xy, centroids, by.x="destination", by.y="Code") -->
+<!-- names(dest.xy)= c("origin", "destination", "trips", "oX", "oY", "dX", "dY") -->
+<!-- ``` -->
+
+<!-- This having been done the flows greater than 3, can be plotted using `ggplot`. First some parameters need to be set: -->
+
+<!-- ```{r} -->
+<!-- xquiet= scale_x_continuous("", breaks=NULL) -->
+<!-- yquiet<-scale_y_continuous("", breaks=NULL) -->
+<!-- quiet<-list(xquiet, yquiet) -->
+<!-- ``` -->
+
+<!-- Then apply `ggplot` with `geom_segment`: -->
+<!-- ```{r} -->
+<!-- # plot line segments with ggplot  -->
+<!-- ggplot(dest.xy[which(dest.xy$trips>3),])+ -->
+<!--   # "alpha=" is line transparency below  -->
+<!--   geom_segment(aes(x=oX, y=oY,xend=dX, yend=dY, alpha=trips), size = 1, col="white")+ -->
+<!--   # then set the line transparency - essential to make the plot readable -->
+<!--   scale_alpha_continuous(range = c(0.03, 0.3))+ -->
+<!--   # set background, and remove axes and fix aspect ratio -->
+<!--   theme(panel.background = element_rect(fill='black',colour='black'))+ -->
+<!--   quiet+ -->
+<!--   coord_equal() -->
+<!-- ``` -->
+
+<!-- Some context can be applied by modifying the plot commands above: -->
+<!-- ```{r cache1, cache = T, message=F, warning=F, cache = F, results='hide'} -->
+<!-- # prepare an outline of the study area  -->
+<!-- pols = SpatialPolygonsDataFrame(gUnaryUnion(as(msoa, "Spatial")), data = data.frame(1)) -->
+<!-- pols@data$id = rownames(pols@data) -->
+<!-- pols.points = fortify(pols, region="id") -->
+<!-- pols.df = left_join(pols.points, pols@data, by="id") -->
+<!-- # then apply a modified version of the above plotting  -->
+<!-- ggplot()+ -->
+<!-- # "alpha=" is line transparency below  -->
+<!-- geom_polygon(data = pols.df, aes(x=long, y=lat), colour="grey", fill="tomato") + -->
+<!-- geom_segment(data = dest.xy[which(dest.xy$trips>10),],  -->
+<!--   aes(x=oX, y=oY,xend=dX, yend=dY, alpha=trips), size = 1, col="black")+ -->
+<!-- # then set the line transparency - essential to make the plot readable -->
+<!--   scale_alpha_continuous(range = c(0.03, 0.3))+ coord_equal() -->
+<!-- ``` -->
+
+In this case we will use the pre-existing origin-destination datset `od_attributes`.
+
+The origin-destination data in `input` can be converted into a spatial (`sf`) object with the function `stplanr::od2line(flow = od_attributes, zones_sf)`.
+
+Instead, we'll use a pre-saved object called `desire_lines`, loaded and plotted as follows:
 
 ```{r}
-# melt the data
-input = melt(ttw[,-c(2, 110, 111)], id.vars = "From_MSOA")
-names(input)= c("origin", "destination","total")
-# create centroids with a Code reference
-centroids = data.frame(st_coordinates(st_centroid(msoa)), Code = msoa$code)
-# merge to get the xy coordinates joined to the origins
-or.xy= merge(input, centroids, by.x="origin", by.y="Code")
-names(or.xy)= c("origin", "destination", "trips", "oX", "oY")
-# merge to get the xy coordinates joined to the destinations
-dest.xy=  merge(or.xy, centroids, by.x="destination", by.y="Code")
-names(dest.xy)= c("origin", "destination", "trips", "oX", "oY", "dX", "dY")
-```
-
-This having been done the flows greater than 3, can be plotted using `ggplot`. First some parameters need to be set:
-```{r}
-xquiet= scale_x_continuous("", breaks=NULL)
-yquiet<-scale_y_continuous("", breaks=NULL)
-quiet<-list(xquiet, yquiet)
-```
-
-Then apply `ggplot` with `geom_segment`:
-```{r}
-# plot line segments with ggplot 
-ggplot(dest.xy[which(dest.xy$trips>3),])+
-  # "alpha=" is line transparency below 
-  geom_segment(aes(x=oX, y=oY,xend=dX, yend=dY, alpha=trips), size = 1, col="white")+
-  # then set the line transparency - essential to make the plot readable
-  scale_alpha_continuous(range = c(0.03, 0.3))+
-  # set background, and remove axes and fix aspect ratio
-  theme(panel.background = element_rect(fill='black',colour='black'))+
-  quiet+
-  coord_equal()
-```
-
-Some context can be applied by modifying the plot commands above:
-```{r cache1, cache = T, message=F, warning=F, cache = F, results='hide'}
-# prepare an outline of the study area 
-pols = SpatialPolygonsDataFrame(gUnaryUnion(as(msoa, "Spatial")), data = data.frame(1))
-pols@data$id = rownames(pols@data)
-pols.points = fortify(pols, region="id")
-pols.df = left_join(pols.points, pols@data, by="id")
-# then apply a modified version of the above plotting 
-ggplot()+
-# "alpha=" is line transparency below 
-geom_polygon(data = pols.df, aes(x=long, y=lat), colour="grey", fill="tomato") +
-geom_segment(data = dest.xy[which(dest.xy$trips>10),], 
-  aes(x=oX, y=oY,xend=dX, yend=dY, alpha=trips), size = 1, col="black")+
-# then set the line transparency - essential to make the plot readable
-  scale_alpha_continuous(range = c(0.03, 0.3))+ coord_equal()
-```
-
-The origin-destination data in `input` can be converted into a spatial (`sf`) object as follows:
-
-```{r}
-input_sf = stplanr::od2line(flow = input, msoa["code"])
-plot(input_sf)
+desire_lines = readRDS("l.Rds")
+plot(desire_lines[1:2])
 ```
 
 This may look like a [Jackson Pollok](https://en.wikipedia.org/wiki/Jackson_Pollock) piece of art but actually the result is useful:
-`input_sf` is a fully fledged spatial object so we can do geographic operations on it, such as finding a 500 m buffer around each one.
+`desire_lines` is a fully fledged spatial object so we can do geographic operations on it, such as finding a 500 m buffer around each one.
 Instead of putting a buffer around *every* flow we will pick the top 100 lines (that have a distance) for clarity:
 
 ```{r}
-input_sf$length = st_length(input_sf) %>% 
+desire_lines$length = st_length(desire_lines) %>% 
   as.numeric()
-input_sf_lines = input_sf[input_sf$length > 0, ]
-input_sf100 = top_n(input_sf_lines, n = 100, wt = total)
-input_sf100_buffer = st_buffer(input_sf100, dist = 500)
-plot(input_sf100_buffer["total"])
+desire_lines_lines = desire_lines[desire_lines$length > 0, ]
+desire_lines100 = top_n(desire_lines_lines, n = 100, wt = all)
+desire_lines100_buffer = st_buffer(desire_lines100, dist = 0.01)
+plot(desire_lines100_buffer["all"])
 ```
 
 ## 6.3 Routing to represent cycling behaviour
@@ -820,8 +840,8 @@ If you get a cyclestreets API key, and save it as `CYCLESTREETS=your-code-goes-h
 
 ```{r, eval=FALSE}
 # note: this code chunk does not run - requires API key
-input_sf100_wgs = st_transform(input_sf100, 4326)
-odf = stplanr::line2df(input_sf100_wgs)
+desire_lines100_wgs = st_transform(desire_lines100, 4326)
+odf = stplanr::line2df(desire_lines100_wgs)
 origins = odf[c("fx", "fy")]
 destinations = odf[c("tx", "ty")]
 route1 = cyclestreets::journey(origins[1, ], destinations[1, ])
@@ -884,117 +904,117 @@ It would be nice to see this in the context of the MSOAs but the `hampi_sf$osm_l
 osm_sf$osm_lines = st_transform(osm_sf$osm_lines, crs = 27700)
 tm_shape(osm_sf$osm_lines)+
   tm_lines(lwd = 2, col = "red")+
-  tm_shape(msoa)+
+  tm_shape(zones_sf)+
   tm_borders(, alpha = 0.5, col = "lightgrey")
 ```
 
 This shows the current cycle routes and can be considered against the original and destinations mapped before:
 
-```{r eval = F}
-tm_shape(temp) +
-  tm_polygons(c("OriginSum", "DestSum")) +
-  tm_layout(legend.position = c("left","bottom"))
-```
+<!-- ```{r eval = F} -->
+<!-- tm_shape(temp) + -->
+<!--   tm_polygons(c("OriginSum", "DestSum")) + -->
+<!--   tm_layout(legend.position = c("left","bottom")) -->
+<!-- ``` -->
 
-There are many ways we could / should determine new cycle routes but perhaps the easiest is to examine the distribution of distances that people cycle, to identify the typical distances that people are prepared to cycle in this region. We can use the distribution of distances people cycle to do this. First we  can write a little function and to calculate the distance between the coordinates in the `dest.xy` data created above:
+<!-- There are many ways we could / should determine new cycle routes but perhaps the easiest is to examine the distribution of distances that people cycle, to identify the typical distances that people are prepared to cycle in this region. We can use the distribution of distances people cycle to do this. First we  can write a little function and to calculate the distance between the coordinates in the `dest.xy` data created above: -->
 
-```{r}
-head(dest.xy)
-# function to calulate distace in km between MSOAs
-calc.dist = function(x){
-  return( sqrt( (x[3]-x[1])^2 + (x[4]-x[3])^2 ) /1000)
-}
-# create a new variable in dest.xy
-dest.xy$dist = apply(dest.xy[,4:7], 1,calc.dist )
-```
+<!-- ```{r} -->
+<!-- head(dest.xy) -->
+<!-- # function to calulate distace in km between MSOAs -->
+<!-- calc.dist = function(x){ -->
+<!--   return( sqrt( (x[3]-x[1])^2 + (x[4]-x[3])^2 ) /1000) -->
+<!-- } -->
+<!-- # create a new variable in dest.xy -->
+<!-- dest.xy$dist = apply(dest.xy[,4:7], 1,calc.dist ) -->
+<!-- ``` -->
 
-Then we can use this to generate a distribution of distances cycled to work
-```{r}
-trip.counts = round(dest.xy$trips, 0)
-dist.vec = vector()
-for( i in 1: length(trip.counts)) {
-  dist.i = rep(dest.xy$dist[i], trip.counts[i])
-  dist.vec = append(dist.vec, dist.i)
-}
-```
+<!-- Then we can use this to generate a distribution of distances cycled to work -->
+<!-- ```{r} -->
+<!-- trip.counts = round(dest.xy$trips, 0) -->
+<!-- dist.vec = vector() -->
+<!-- for( i in 1: length(trip.counts)) { -->
+<!--   dist.i = rep(dest.xy$dist[i], trip.counts[i]) -->
+<!--   dist.vec = append(dist.vec, dist.i) -->
+<!-- } -->
+<!-- ``` -->
 
-The results can be checked 
+<!-- The results can be checked  -->
 
-```{r}
-length(dist.vec)
-sum(ttw$OriginSum)
-```
+<!-- ```{r} -->
+<!-- length(dist.vec) -->
+<!-- sum(zones$all) -->
+<!-- ``` -->
 
-And then we can have a look at the distribution of cycling trip distances and specifally the typical distance people cycle use the inter-quartile range (IQR):
+<!-- And then we can have a look at the distribution of cycling trip distances and specifally the typical distance people cycle use the inter-quartile range (IQR): -->
 
-```{r}
-summary(dist.vec)
-ggplot(data.frame(x = dist.vec), aes(x = x)) + 
-    geom_histogram(binwidth=1,colour="white") +
-    geom_vline(aes(xintercept = summary(dist.vec)[2]), lwd = 2, col = "#FB6A4ACC") +
-    geom_vline(aes(xintercept = summary(dist.vec)[5]), lwd = 2, col = "#FB6A4ACC") +
-    xlab("Distance (km)")+
-    labs(title="Distribution of commuting cycle distances in Leeds, with IQRs")
-```
+<!-- ```{r} -->
+<!-- summary(dist.vec) -->
+<!-- ggplot(data.frame(x = dist.vec), aes(x = x)) +  -->
+<!--     geom_histogram(binwidth=1,colour="white") + -->
+<!--     geom_vline(aes(xintercept = summary(dist.vec)[2]), lwd = 2, col = "#FB6A4ACC") + -->
+<!--     geom_vline(aes(xintercept = summary(dist.vec)[5]), lwd = 2, col = "#FB6A4ACC") + -->
+<!--     xlab("Distance (km)")+ -->
+<!--     labs(title="Distribution of commuting cycle distances in Leeds, with IQRs") -->
+<!-- ``` -->
 
-So most people travel between 3.8 and8.1 km during their cycling commute and we know that the majority of the commuting is to the centre of the city. This suggests a region around the centre MSOAs that could be mapped and investigated for potential routes. To confirm we can map the MOSAs with more than 150 cycle commutes.  We will need to work with projected data (in metres) to make the distance measures easier. 
+<!-- So most people travel between 3.8 and8.1 km during their cycling commute and we know that the majority of the commuting is to the centre of the city. This suggests a region around the centre MSOAs that could be mapped and investigated for potential routes. To confirm we can map the MOSAs with more than 150 cycle commutes.  We will need to work with projected data (in metres) to make the distance measures easier.  -->
 
-First we need to make an index to align and reorder `ttw` to make sure the data rows are aligned.
+<!-- First we need to make an index to align and reorder `ttw` to make sure the data rows are aligned. -->
 
-```{r}
-index = match(msoa$code, ttw$From_MSOA)
-index 
-ttw = ttw[index, ]
-```
+<!-- ```{r} -->
+<!-- index = match(msoa$code, ttw$From_MSOA) -->
+<!-- index  -->
+<!-- ttw = ttw[index, ] -->
+<!-- ``` -->
 
-Then we can map the MSOAs that are the largest destinations to confirm they are contiguous and then combine these and create buffers reflecting these distances. Here we have to work in projected:
+<!-- Then we can map the MSOAs that are the largest destinations to confirm they are contiguous and then combine these and create buffers reflecting these distances. Here we have to work in projected: -->
 
-```{r}
-# map 
-tm_shape(msoa)+
-  tm_borders("lightgrey")+
-  tm_shape(msoa[ttw$DestSum > 150,])+
-  tm_polygons()
-# combine
-city = st_union(msoa[ttw$DestSum > 150,])
-city_buf_inner <-st_buffer(city, 3800) 
-city_buf_outer <-st_buffer(city, 8100) 
-```
+<!-- ```{r, echo=FALSE} -->
+<!-- # map  -->
+<!-- tm_shape(zones_sf)+ -->
+<!--   tm_borders("lightgrey")+ -->
+<!--   tm_shape(zones_sf[ttw$DestSum > 150,])+ -->
+<!--   tm_polygons() -->
+<!-- # combine -->
+<!-- city = st_union(zones_sf[ttw$DestSum > 150,]) -->
+<!-- city_buf_inner <-st_buffer(city, 3800)  -->
+<!-- city_buf_outer <-st_buffer(city, 8100)  -->
+<!-- ``` -->
 
-Then we can examine the commuters in the MSOAs in this area, with cycle routes in order to suggest areas for cycle route development. 
+<!-- Then we can examine the commuters in the MSOAs in this area, with cycle routes in order to suggest areas for cycle route development.  -->
 
-```{r}
-# set the plot to the outer buffer
-tm_shape(city_buf_outer)+
-  tm_borders(NULL)+
-# map the MSOA origins 
-  tm_shape(temp)+
-  tm_polygons("OriginSum")+
-# map the core MSOAs destinations
-  tm_shape(city)+
-  tm_polygons()+
-# map the buffers
-  tm_shape(city_buf_outer)+
-  tm_borders("red")+
-  tm_shape(city_buf_inner)+
-  tm_borders("red")+
-# finally map the existingclyce routes
-  tm_shape(osm_sf$osm_lines)+
-  tm_lines(lwd = 2, col = "red")
-```
+<!-- ```{r, echo=FALSE} -->
+<!-- # set the plot to the outer buffer -->
+<!-- tm_shape(city_buf_outer)+ -->
+<!--   tm_borders(NULL)+ -->
+<!-- # map the MSOA origins  -->
+<!--   tm_shape(temp)+ -->
+<!--   tm_polygons("OriginSum")+ -->
+<!-- # map the core MSOAs destinations -->
+<!--   tm_shape(city)+ -->
+<!--   tm_polygons()+ -->
+<!-- # map the buffers -->
+<!--   tm_shape(city_buf_outer)+ -->
+<!--   tm_borders("red")+ -->
+<!--   tm_shape(city_buf_inner)+ -->
+<!--   tm_borders("red")+ -->
+<!-- # finally map the existingclyce routes -->
+<!--   tm_shape(osm_sf$osm_lines)+ -->
+<!--   tm_lines(lwd = 2, col = "red") -->
+<!-- ``` -->
 
-This suggests a number of possible area for expansion of the cycle route where there are large number of existing cycle commuters and a lack of cycle routes:
+<!-- This suggests a number of possible area for expansion of the cycle route where there are large number of existing cycle commuters and a lack of cycle routes: -->
 
-- to the North-North-West of the city
-- to the North-North-East of the city
-- to the South of the city
+<!-- - to the North-North-West of the city -->
+<!-- - to the North-North-East of the city -->
+<!-- - to the South of the city -->
 
-There are a number of caveats and potential refinements that could be undertaken:
+<!-- There are a number of caveats and potential refinements that could be undertaken: -->
 
-- MSOAs are quite spatially course and lower geographies could be more informative
-- MSOA centroids were used to evaluate distances
-- the Census data are quite out of date and cycling has exploded in recent years meaning that the patterns of cycle commuting may have changed
-- further analyses could examine how the development of cycle routes could be used to expand the cycling community
+<!-- - MSOAs are quite spatially course and lower geographies could be more informative -->
+<!-- - MSOA centroids were used to evaluate distances -->
+<!-- - the Census data are quite out of date and cycling has exploded in recent years meaning that the patterns of cycle commuting may have changed -->
+<!-- - further analyses could examine how the development of cycle routes could be used to expand the cycling community -->
 
 ## 6.5 Finding mismatches between cycle use and cycling infrastructure
 
@@ -1071,8 +1091,8 @@ In terms of further R resources, there is lots out there, including:
 
 - https://uk.sagepub.com/en-gb/eur/an-introduction-to-r-for-spatial-analysis-and-mapping/book241031
 - https://www.springer.com/gb/book/9781461476177
-- https://geocompr.robinlovelace.net/
 - https://cengel.github.io/rspatial/
+- https://geocompr.robinlovelace.net/ especially the transport chapter
 
 
 
