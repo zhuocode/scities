@@ -248,7 +248,7 @@ pkgs = c(
 ```
 
 ```{r, eval=FALSE}
-# install.packages(pkgs)
+install.packages(pkgs)
 ```
 
 ```{r, include=FALSE}
