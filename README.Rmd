@@ -248,7 +248,7 @@ pkgs = c(
 ```
 
 ```{r, eval=FALSE}
-# install.packages(pkgs)
+install.packages(pkgs)
 ```
 
 ```{r, include=FALSE}
@@ -285,7 +285,7 @@ The introductory comments of Chapter 2 in the open source and open access book [
 
 In brief, real-world discrete geographic features are represented in spatial databases using vectors of points, lines and areas. For example, point to represent a shop, address or postcode location, lines for linear features such roads and areas for things likes parks, zones, building outlines etc. Continuous features (eg temperature surfaces) are frequently repsented by gridded or raster data. The *spatial* objects provide a framework for hanging information or *attributes* about these features. This could be the number of people living in each house, the area of a park, the opening times of a shop etc, and each object can have multiple attributes that are usually held in some form data table. Thus a spatial database holds information about the location and extent of geographic features and their properties or *attributes*.
 
-There are 1000s of R packages and the `sf` (Simple Features) package provides formats for spatial dat aand their analysis. The `sf` vignette provides an introduction to vector data and formal descriptions of spatial formats: https://cran.r-project.org/web/packages/sf/vignettes/sf1.html
+There are 1000s of R packages and the `sf` (Simple Features) package provides formats for spatial data and their analysis. The `sf` vignette provides an introduction to vector data and formal descriptions of spatial formats: https://cran.r-project.org/web/packages/sf/vignettes/sf1.html
 
 # 2. Data sources and data import
 
